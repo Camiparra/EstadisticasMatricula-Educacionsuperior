@@ -1,0 +1,241 @@
+/* ==========================================================================
+   Componentes de accesibilidad y botón "volver arriba"
+   Las clases a11y-* se agregan a <html> desde el panel de accesibilidad.
+   ========================================================================== */
+
+/* ---------- Saltar al contenido ---------- */
+
+.saltar-contenido {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 2000;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.6rem;
+    background-color: var(--bs-body-color);
+    color: var(--bs-body-bg);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform 0.2s ease;
+}
+
+.saltar-contenido:focus {
+    transform: none;
+    color: var(--bs-body-bg);
+}
+
+/* ---------- Botones flotantes ---------- */
+
+.boton-flotante {
+    position: fixed;
+    bottom: 1.25rem;
+    z-index: 1030;
+    width: 3.1rem;
+    height: 3.1rem;
+    border: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 1.35rem;
+    box-shadow: var(--app-sombra-elevada);
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s;
+}
+
+.boton-flotante:hover {
+    transform: translateY(-3px);
+}
+
+.boton-accesibilidad {
+    left: 1.25rem;
+    background-color: #3498db;
+    color: #fff;
+}
+
+.volver-arriba {
+    right: 1.25rem;
+    background-color: var(--app-superficie);
+    color: var(--bs-body-color);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+}
+
+.volver-arriba.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+
+.volver-arriba.visible:hover {
+    transform: translateY(-3px);
+}
+
+/* Anillo que muestra el avance de lectura de la página */
+.anillo-progreso {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.anillo-progreso circle {
+    fill: none;
+    stroke-width: 3;
+}
+
+.anillo-pista {
+    stroke: var(--app-borde);
+}
+
+.anillo-avance {
+    stroke: #18bc9c;
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: calc(100 - var(--avance, 0));
+}
+
+/* ---------- Panel de accesibilidad ---------- */
+
+.panel-accesibilidad {
+    background-color: var(--app-superficie);
+    color: var(--bs-body-color);
+}
+
+.grupo-a11y {
+    border-top: 1px solid var(--app-borde);
+    padding-top: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.etiqueta-a11y {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--app-texto-suave);
+    margin-bottom: 0.75rem;
+}
+
+.opcion-a11y {
+    padding: 0.6rem 0.75rem 0.6rem 3.25rem;
+    border-radius: 0.7rem;
+    margin-bottom: 0.35rem;
+    background-color: var(--app-superficie-2);
+}
+
+.opcion-a11y .form-check-input {
+    margin-left: -2.5rem;
+}
+
+.opcion-a11y .form-check-label {
+    font-weight: 600;
+}
+
+.opcion-a11y .form-text {
+    margin-top: 0.1rem;
+    color: var(--app-texto-suave);
+}
+
+.valor-escala {
+    padding: 0.3rem;
+    border-radius: 0.5rem;
+    background-color: var(--app-superficie-2);
+}
+
+/* ---------- Modos de accesibilidad ---------- */
+
+/* Alto contraste */
+.a11y-contraste {
+    --app-texto-suave: #000;
+    --app-borde: #000;
+    --bs-secondary-color: #000;
+    --bs-body-color: #000;
+    --app-fondo: #fff;
+    --app-superficie: #fff;
+    --app-superficie-2: #fff;
+}
+
+.a11y-contraste[data-tema="oscuro"] {
+    --app-texto-suave: #fff;
+    --app-borde: #fff;
+    --bs-secondary-color: #fff;
+    --bs-body-color: #fff;
+    --bs-body-bg: #000;
+    --app-fondo: #000;
+    --app-superficie: #000;
+    --app-superficie-2: #000;
+}
+
+.a11y-contraste .card,
+.a11y-contraste .chip,
+.a11y-contraste .opcion-a11y {
+    border: 2px solid var(--app-borde) !important;
+}
+
+.a11y-contraste a:not(.btn) {
+    text-decoration: underline;
+}
+
+/* Subrayar enlaces */
+.a11y-subrayado a:not(.btn):not(.navbar-brand) {
+    text-decoration: underline !important;
+    text-underline-offset: 0.2em;
+}
+
+/* Espaciado amplio (criterio 1.4.12 de WCAG) */
+.a11y-espaciado body {
+    letter-spacing: 0.08em;
+    word-spacing: 0.16em;
+    line-height: 1.8;
+}
+
+.a11y-espaciado p,
+.a11y-espaciado li,
+.a11y-espaciado dd {
+    margin-bottom: 1.2em;
+}
+
+/* Fuente de alta legibilidad */
+.a11y-legible {
+    --fuente-titulos: "Atkinson Hyperlegible", system-ui, sans-serif;
+    --fuente-texto: "Atkinson Hyperlegible", system-ui, sans-serif;
+    --bs-body-font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+
+/* Reducir movimiento */
+.a11y-sin-movimiento {
+    scroll-behavior: auto !important;
+}
+
+.a11y-sin-movimiento *,
+.a11y-sin-movimiento *::before,
+.a11y-sin-movimiento *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+}
+
+.a11y-sin-movimiento .aparecer {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+@media (max-width: 575.98px) {
+    .boton-flotante {
+        width: 2.75rem;
+        height: 2.75rem;
+        bottom: 0.9rem;
+        font-size: 1.2rem;
+    }
+
+    .boton-accesibilidad {
+        left: 0.9rem;
+    }
+
+    .volver-arriba {
+        right: 0.9rem;
+    }
+}
