@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inicio.css') }}">
+{% endblock %}
+
+{% block cuerpo %}
+{# ---------- Portada ---------- #}
+<section class="portada" aria-labelledby="portada-titulo">
+    <div class="portada-decoracion" aria-hidden="true">
+        {% for d in dimensiones %}<span class="mancha" style="--color-dimension: {{ d.color }}"></span>{% endfor %}
+    </div>
+    <div class="container position-relative">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7 aparecer">
+                <p class="etiqueta-portada">
+                    <i class="bi bi-database" aria-hidden="true"></i>
+                    Datos abiertos · MEN – SNIES · {{ resumen.anio_inicial }}–{{ resumen.anio_final }}
+                </p>
+                <h1 id="portada-titulo" class="titulo-portada">
+                    ¿Quién estudia, dónde y cómo ha cambiado la
+                    <span class="resaltado">educación superior</span> en Colombia?
+                </h1>
+                <p class="lead texto-portada">
+                    Exploramos {{ resumen.registros | miles }} registros de matrícula por municipio
+                    para entender cómo se compone, dónde se concentra, cómo evoluciona y qué
+                    relaciones esconde la población universitaria del país.
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <a class="btn btn-light btn-lg boton-portada" href="#dimensiones">
+                        Explorar el análisis <i class="bi bi-arrow-down ms-1" aria-hidden="true"></i>
+                    </a>
+                    <a class="btn btn-outline-light btn-lg boton-portada" href="#datos">
+                        Conocer los datos
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-5 aparecer" style="--retraso: 150ms">
+                <div class="tarjeta-serie">
+                    <p class="serie-etiqueta mb-1">Matrícula total en {{ resumen.anio_final }}</p>
+                    <p class="serie-valor mb-1"
+                       data-contador="{{ resumen.matricula_final }}">{{ resumen.matricula_final | miles }}</p>
+                    <p class="serie-cambio mb-3">
+                        <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                        {{ resumen.crecimiento_pct | miles(1) }} % más que en {{ resumen.anio_inicial }}
+                    </p>
+                    <div class="sparkline" id="serie-nacional"
+                         data-serie='{{ resumen.serie | tojson }}'
+                         role="img"
+                         aria-label="Matrícula nacional por año entre {{ resumen.anio_inicial }} y {{ resumen.anio_final }}. Use las flechas del teclado para recorrer los años.">
+                    </div>
+                    <div class="d-flex justify-content-between serie-ejes" aria-hidden="true">
+                        <span>{{ resumen.anio_inicial }}</span><span>{{ resumen.anio_final }}</span>
+                    </div>
+                    <details class="serie-tabla mt-2">
+                        <summary>Ver los datos de la serie</summary>
+                        <div class="table-responsive mt-2">
+                            <table class="table table-sm mb-0">
+                                <caption class="visually-hidden">Matrícula nacional por año</caption>
+                                <thead><tr><th scope="col">Año</th><th scope="col" class="text-end">Matrícula</th></tr></thead>
+                                <tbody>
+                                    {% for punto in resumen.serie %}
+                                    <tr><th scope="row">{{ punto.anio }}</th><td class="text-end">{{ punto.matricula | miles }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ---------- Cifras generales ---------- #}
+<section class="container cifras" aria-label="Cifras generales del conjunto de datos">
+    <div class="row g-3">
+        {% for valor, etiqueta, icono, detalle in [
+            (resumen.registros, "Registros válidos", "bi-file-earmark-spreadsheet", "de " ~ (resumen.filas_originales | miles) ~ " filas originales"),
+            (resumen.municipios, "Municipios", "bi-pin-map", "con matrícula reportada"),
+            (resumen.departamentos, "Departamentos", "bi-map", "incluye Bogotá D.C."),
+            (resumen.anios, "Años", "bi-calendar-range", resumen.anio_inicial ~ " a " ~ resumen.anio_final),
+        ] %}
+        <div class="col-6 col-lg-3 aparecer" style="--retraso: {{ loop.index0 * 80 }}ms">
+            <div class="cifra">
+                <span class="cifra-icono" aria-hidden="true"><i class="bi {{ icono }}"></i></span>
+                <span class="cifra-valor" data-contador="{{ valor }}">{{ valor | miles }}</span>
+                <span class="cifra-etiqueta">{{ etiqueta }}</span>
+                <span class="cifra-detalle">{{ detalle }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{# ---------- Dimensiones ---------- #}
+<section id="dimensiones" class="container seccion-inicio" aria-labelledby="dimensiones-titulo">
+    <div class="encabezado-seccion aparecer">
+        <p class="antetitulo">Análisis de datos</p>
+        <h2 id="dimensiones-titulo">Cuatro miradas a los mismos datos</h2>
+        <p class="texto-suave">
+            Cada integrante del equipo responde una pregunta distinta con indicadores,
+            visualizaciones y conocimientos evidentes.
+        </p>
+    </div>
+    <div class="row g-4">
+        {% for d in dimensiones %}
+        {% set persona = integrantes | selectattr("numero", "equalto", d.integrante) | first %}
+        <div class="col-md-6 aparecer" style="--retraso: {{ loop.index0 * 80 }}ms">
+            <article class="tarjeta-dimension h-100" style="--color-dimension: {{ d.color }}">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="icono-dimension icono-grande" aria-hidden="true"><i class="bi {{ d.icono }}"></i></span>
+                    <span class="numero-dimension" aria-hidden="true">{{ "%02d" % d.numero }}</span>
+                </div>
+                <h3 class="h4">
+                    <a class="stretched-link enlace-tarjeta" href="{{ url_for(d.slug) }}">{{ d.titulo }}</a>
+                </h3>
+                <p class="pregunta-tarjeta">{{ d.pregunta }}</p>
+                <p class="texto-suave small mb-4">{{ d.resumen }}</p>
+                <div class="d-flex align-items-center justify-content-between mt-auto pie-tarjeta">
+                    <span class="small texto-suave">
+                        <i class="bi bi-person-badge me-1" aria-hidden="true"></i>{{ persona.nombre }}
+                    </span>
+                    <span class="flecha-tarjeta" aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{# ---------- Sobre los datos ---------- #}
+<section id="datos" class="seccion-inicio seccion-alterna" aria-labelledby="datos-titulo">
+    <div class="container">
+        <div class="encabezado-seccion aparecer">
+            <p class="antetitulo">El conjunto de datos</p>
+            <h2 id="datos-titulo">De dónde salen los números</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5 aparecer">
+                <div class="card ficha h-100">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">{{ dataset.nombre }}</h3>
+                        <dl class="ficha-lista">
+                            <div><dt>Entidad</dt><dd>{{ dataset.entidad }}</dd></div>
+                            <div><dt>Población</dt><dd>{{ dataset.poblacion }}</dd></div>
+                            <div><dt>Periodo</dt><dd>{{ resumen.anio_inicial }} – {{ resumen.anio_final }}</dd></div>
+                            <div><dt>Formato</dt><dd>{{ dataset.formato }}, {{ resumen.filas_originales | miles }} filas y 12 columnas</dd></div>
+                        </dl>
+                        <a class="btn btn-primary" href="{{ dataset.url }}" target="_blank" rel="noopener">
+                            Ver en datos.gov.co <i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i>
+                            <span class="visually-hidden">(abre en una pestaña nueva)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7 aparecer" style="--retraso: 120ms">
+                <h3 class="h5 mb-3">Variables</h3>
+                {% for grupo, icono, variables in [
+                    ("Temporal", "bi-calendar3", ["Año"]),
+                    ("Territorial", "bi-geo-alt", ["Departamento", "Municipio", "Código DANE del departamento", "Código DANE del municipio"]),
+                    ("Nivel de formación (numéricas)", "bi-mortarboard", ["Técnica profesional", "Tecnológica", "Universitaria", "Especialización", "Maestría", "Doctorado"]),
+                    ("Oferta (numérica)", "bi-building", ["IES con oferta en el municipio"]),
+                ] %}
+                <div class="grupo-variables">
+                    <p class="grupo-variables-titulo"><i class="bi {{ icono }} me-1" aria-hidden="true"></i>{{ grupo }}</p>
+                    <ul class="lista-chips">
+                        {% for v in variables %}<li class="chip">{{ v }}</li>{% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+
+                <h3 class="h5 mt-4 mb-3">Cómo preparamos los datos</h3>
+                <ol class="pasos-limpieza">
+                    <li>
+                        <strong>Cifras legibles.</strong> Los valores usan punto para miles y algunos
+                        traen decimales con coma (<code>129.516,5</code>); se convirtieron a números.
+                    </li>
+                    <li>
+                        <strong>{{ resumen.filas_duplicadas | miles }} filas repetidas eliminadas.</strong>
+                        El archivo trae casi todo el periodo {{ resumen.anio_inicial }}–{{ resumen.anio_final - 1 }}
+                        dos veces, a veces con el nombre escrito distinto (BOGOTÁ / BOGOTA).
+                    </li>
+                    <li>
+                        <strong>Territorios normalizados.</strong> Se completaron los códigos DANE
+                        (<code>5</code> → <code>05</code>) y se asignó el nombre de cada departamento,
+                        porque la columna original trae el código.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ---------- Equipo ---------- #}
+<section class="container seccion-inicio" aria-labelledby="equipo-titulo">
+    <div class="encabezado-seccion aparecer">
+        <p class="antetitulo">Equipo</p>
+        <h2 id="equipo-titulo">Quiénes hicimos este análisis</h2>
+    </div>
+    <div class="row g-4">
+        {% for persona in integrantes %}
+        {% set d = dimensiones | selectattr("slug", "equalto", persona.dimension) | first %}
+        <div class="col-sm-6 col-lg-3 aparecer" style="--retraso: {{ loop.index0 * 80 }}ms">
+            <div class="tarjeta-integrante h-100" style="--color-dimension: {{ d.color }}">
+                <span class="avatar" aria-hidden="true">{{ persona.iniciales }}</span>
+                <p class="numero-integrante mb-1">Integrante {{ persona.numero }}</p>
+                <h3 class="h6 mb-2">{{ persona.nombre }}</h3>
+                <p class="small texto-suave mb-3">{{ persona.responsabilidad }}</p>
+                <a class="small enlace-dimension-integrante" href="{{ url_for(d.slug) }}">
+                    <i class="bi {{ d.icono }} me-1" aria-hidden="true"></i>{{ d.titulo }}
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/inicio.js') }}"></script>
+{% endblock %}
