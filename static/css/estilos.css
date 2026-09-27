@@ -1,0 +1,425 @@
+/* ==========================================================================
+   Estilos generales del sitio
+   Los colores principales vienen de Bootswatch (Flatly / Darkly) mediante las
+   variables --bs-*. Darkly deja algunas variables de fondo y borde con valores
+   claros (--bs-tertiary-bg, --bs-border-color), por eso las superficies usan
+   variables propias (--app-*) que cambian con el atributo data-tema de <html>.
+   ========================================================================== */
+
+:root {
+    --fuente-titulos: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --fuente-texto: "Figtree", "Segoe UI", system-ui, sans-serif;
+    --bs-body-font-family: var(--fuente-texto);
+
+    --app-fondo: #f6f8fa;
+    --app-superficie: #ffffff;
+    --app-superficie-2: #eef2f5;
+    --app-borde: #dde3e8;
+    --app-texto: #212529;
+    --app-texto-suave: #5b6770;
+    --app-sombra: 0 1px 2px rgba(20, 30, 40, 0.06), 0 8px 24px rgba(20, 30, 40, 0.06);
+    --app-sombra-elevada: 0 2px 4px rgba(20, 30, 40, 0.06), 0 18px 40px rgba(20, 30, 40, 0.12);
+    --app-radio: 1rem;
+    --app-altura-menu: 4.25rem;
+    --app-acento-texto: #128a73;
+
+    --portada-inicio: #1f2d3b;
+    --portada-medio: #2c3e50;
+    --portada-fin: #16876f;
+}
+
+[data-tema="oscuro"] {
+    --app-fondo: #1b1b1b;
+    --app-superficie: #262626;
+    --app-superficie-2: #2e2e2e;
+    --app-borde: #3a3a3a;
+    --app-texto: #ffffff;
+    --app-texto-suave: #b3b9bf;
+    --app-sombra: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+    --app-sombra-elevada: 0 2px 4px rgba(0, 0, 0, 0.35), 0 18px 40px rgba(0, 0, 0, 0.4);
+    --app-acento-texto: #5ee0c3;
+
+    --portada-inicio: #101820;
+    --portada-medio: #1e3348;
+    --portada-fin: #115e4f;
+}
+
+/* Variante del color de cada dimensión apta para texto (contraste suficiente
+   sobre el fondo): más oscura en modo claro y más clara en modo oscuro. */
+[style*="--color-dimension"] {
+    --color-dimension-texto: color-mix(in srgb, var(--color-dimension) 58%, #000);
+}
+
+[data-tema="oscuro"] [style*="--color-dimension"] {
+    --color-dimension-texto: color-mix(in srgb, var(--color-dimension) 60%, #fff);
+}
+
+/* ---------- Base ---------- */
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--app-altura-menu) + 1rem);
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--app-fondo);
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+main:focus {
+    outline: none;
+}
+
+.texto-suave {
+    color: var(--app-texto-suave) !important;
+}
+
+.antetitulo {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-dimension-texto, var(--app-acento-texto));
+}
+
+::selection {
+    background-color: rgba(24, 188, 156, 0.3);
+}
+
+:focus-visible {
+    outline: 3px solid var(--bs-info);
+    outline-offset: 2px;
+}
+
+.card {
+    background-color: var(--app-superficie);
+    border-color: var(--app-borde);
+    border-radius: var(--app-radio);
+}
+
+/* ---------- Menú principal ---------- */
+
+.barra-principal {
+    min-height: var(--app-altura-menu);
+    transition: box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.barra-principal.desplazada {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+.marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--fuente-titulos);
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+}
+
+.marca-logo {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.7rem;
+    background: linear-gradient(135deg, #18bc9c, #3498db 60%, #9b59b6);
+    color: #fff;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 12px rgba(24, 188, 156, 0.35);
+    transition: transform 0.3s ease;
+}
+
+.marca:hover .marca-logo {
+    transform: rotate(-8deg) scale(1.05);
+}
+
+.marca-acento {
+    margin-left: 0.15rem;
+    padding: 0 0.3rem;
+    border-radius: 0.35rem;
+    background-color: rgba(255, 255, 255, 0.15);
+    font-weight: 600;
+}
+
+.barra-principal .nav-link {
+    border-radius: 0.6rem;
+    padding-inline: 0.8rem !important;
+    transition: background-color 0.2s ease;
+}
+
+.barra-principal .nav-link:hover,
+.barra-principal .nav-link.active,
+.barra-principal .nav-link.show {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.boton-tema {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+}
+
+.boton-tema i {
+    transition: transform 0.4s ease;
+}
+
+.boton-tema:hover i {
+    transform: rotate(25deg);
+}
+
+/* Menú desplegable de dimensiones.
+   Colores propios porque hereda el data-bs-theme="dark" de la barra y en
+   modo claro quedaría oscuro. */
+.menu-dimensiones {
+    --bs-dropdown-bg: var(--app-superficie);
+    --bs-dropdown-color: var(--app-texto);
+    --bs-dropdown-border-color: var(--app-borde);
+    --bs-dropdown-link-color: var(--app-texto);
+    --bs-dropdown-link-hover-color: var(--app-texto);
+    --bs-dropdown-link-hover-bg: var(--app-superficie-2);
+    --bs-dropdown-link-active-color: var(--app-texto);
+    min-width: 21rem;
+    padding: 0.5rem;
+    border-radius: var(--app-radio);
+}
+
+.menu-dimensiones .dropdown-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.7rem;
+    white-space: normal;
+}
+
+.menu-dimensiones .dropdown-item.active,
+.menu-dimensiones .dropdown-item:active {
+    background-color: color-mix(in srgb, var(--color-dimension) 18%, transparent);
+    color: var(--app-texto);
+}
+
+/* Ícono de dimensión: fondo tenue y símbolo en el color de la dimensión */
+.icono-dimension {
+    flex-shrink: 0;
+    display: inline-grid;
+    place-items: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 0.7rem;
+    background-color: color-mix(in srgb, var(--color-dimension) 16%, transparent);
+    color: var(--color-dimension);
+    font-size: 1.1rem;
+}
+
+/* ---------- Pie de página ---------- */
+
+.pie {
+    background-color: var(--app-superficie);
+    border-top: 1px solid var(--app-borde);
+}
+
+.marca-pie {
+    color: var(--bs-body-color);
+}
+
+.marca-pie .marca-acento {
+    background-color: var(--app-superficie-2);
+}
+
+.titulo-pie {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--app-texto-suave);
+    margin-bottom: 1rem;
+}
+
+.enlaces-pie li + li {
+    margin-top: 0.5rem;
+}
+
+.enlaces-pie a {
+    color: var(--bs-body-color);
+    text-decoration: none;
+}
+
+.enlaces-pie a:hover {
+    color: var(--bs-success);
+    text-decoration: underline;
+}
+
+.pie-inferior {
+    border-top: 1px solid var(--app-borde);
+    color: var(--app-texto-suave);
+}
+
+/* ---------- Componentes compartidos ---------- */
+
+/* Encabezado de sección */
+.encabezado-seccion {
+    max-width: 44rem;
+    margin-bottom: 2rem;
+}
+
+.encabezado-seccion h2 {
+    font-size: clamp(1.7rem, 1.2rem + 1.6vw, 2.4rem);
+}
+
+/* Tarjetas de indicadores de los tableros */
+.indicador {
+    border: 1px solid var(--app-borde);
+    box-shadow: var(--app-sombra);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.indicador::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: var(--color-dimension, var(--bs-primary));
+}
+
+.indicador:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--app-sombra-elevada);
+}
+
+.indicador .etiqueta {
+    color: var(--app-texto-suave);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.indicador .valor {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-top: 0.35rem;
+}
+
+.indicador .detalle {
+    color: var(--app-texto-suave);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.indicador-icono {
+    display: inline-grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 0.6rem;
+    background-color: color-mix(in srgb, var(--color-dimension, var(--bs-primary)) 15%, transparent);
+    color: var(--color-dimension, var(--bs-primary));
+}
+
+/* Chips */
+.lista-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.chip {
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background-color: var(--app-superficie-2);
+    border: 1px solid var(--app-borde);
+    font-size: 0.85rem;
+}
+
+/* Lista con marcas de verificación */
+.lista-chequeo {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0 0;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.lista-chequeo li {
+    position: relative;
+    padding-left: 1.6rem;
+}
+
+.lista-chequeo li::before {
+    content: "\F270"; /* bi-check2-circle */
+    font-family: "bootstrap-icons";
+    position: absolute;
+    left: 0;
+    color: var(--color-dimension, var(--bs-success));
+}
+
+/* Página 404 */
+.pagina-error {
+    max-width: 38rem;
+    padding-block: 3rem;
+}
+
+.codigo-error {
+    font-family: var(--fuente-titulos);
+    font-size: clamp(5rem, 3rem + 10vw, 9rem);
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #3498db, #18bc9c 45%, #f39c12 75%, #9b59b6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* ---------- Animaciones de aparición ----------
+   Solo se ocultan si hay JavaScript (clase .js en <html>), así el contenido
+   siempre es visible aunque el script no cargue. */
+
+.js .aparecer {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--retraso, 0ms);
+}
+
+.js .aparecer.visible {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .js .aparecer {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+/* Transición suave al cambiar de tema */
+body,
+.card,
+.pie {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}

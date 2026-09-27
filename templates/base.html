@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es"
+      data-tema-claro="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/flatly/bootstrap.min.css"
+      data-tema-oscuro="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/darkly/bootstrap.min.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Análisis exploratorio de la matrícula en educación superior en Colombia por municipio (MEN - SNIES, 2005-2021).">
+    <title>{% block titulo %}Inicio{% endblock %} | Matrícula en Educación Superior</title>
+
+    <!-- Tema Bootswatch: Flatly (claro) o Darkly (oscuro) y preferencias de
+         accesibilidad. Se aplican antes de pintar la página para evitar
+         parpadeos. -->
+    <script>
+        (function () {
+            var raiz = document.documentElement;
+            raiz.classList.add("js");
+
+            var guardado = null;
+            try { guardado = localStorage.getItem("tema"); } catch (e) {}
+            var tema = guardado || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "oscuro" : "claro");
+
+            var enlace = document.createElement("link");
+            enlace.id = "tema-bootswatch";
+            enlace.rel = "stylesheet";
+            enlace.href = tema === "oscuro" ? raiz.dataset.temaOscuro : raiz.dataset.temaClaro;
+            enlace.setAttribute("blocking", "render");
+            document.currentScript.after(enlace);
+            raiz.dataset.tema = tema;
+
+            var accesibilidad = {};
+            try { accesibilidad = JSON.parse(localStorage.getItem("accesibilidad")) || {}; } catch (e) {}
+            if (accesibilidad.escala) { raiz.style.fontSize = accesibilidad.escala + "%"; }
+            ["contraste", "subrayado", "espaciado", "legible", "sin-movimiento"].forEach(function (opcion) {
+                if (accesibilidad[opcion]) { raiz.classList.add("a11y-" + opcion); }
+            });
+        })();
+    </script>
+    <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/flatly/bootstrap.min.css">
+    </noscript>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:ital,wght@0,400..700;1,400&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accesibilidad.css') }}">
+    {% block estilos %}{% endblock %}
+</head>
+<body>
+    {% include "partials/accesibilidad.html" %}
+    {% include "partials/navbar.html" %}
+
+    <main id="contenido" class="flex-grow-1" tabindex="-1">
+        {% block cuerpo %}
+        <div class="container py-4 py-lg-5">
+            {% block contenido %}{% endblock %}
+        </div>
+        {% endblock %}
+    </main>
+
+    {% include "partials/pie.html" %}
+    {% include "partials/volver_arriba.html" %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/tema.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/accesibilidad.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/volver-arriba.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sitio.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
