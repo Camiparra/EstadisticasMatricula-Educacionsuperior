@@ -1,0 +1,17 @@
+{# Tablero de la dimensión multivariada — Integrante 4 (Richard).
+
+   Esta página hereda la estructura común de dimensiones/_plantilla.html.
+   Para completar el tablero, reemplazar aquí los bloques de cada sección:
+       contexto, variables, filtros, indicadores, visualizaciones,
+       conocimientos, limitacion, decision
+
+   Ejemplo:
+       {% block indicadores %}
+       <div class="row g-3">
+           <div class="col-md-4">{{ indicador("2.448.271", "Matrícula 2021", icono="bi-people") }}</div>
+       </div>
+       {% endblock %}
+
+   Los datos se envían desde la función multivariada() de app.py. #}
+{% extends "dimensiones/_plantilla.html" %}
+{% from "partials/macros.html" import indicador, tarjeta_grafica, conocimiento %}
