@@ -1,17 +1,156 @@
 {# Tablero de la dimensión temporal — Integrante 3 (Nicolas).
-
-   Esta página hereda la estructura común de dimensiones/_plantilla.html.
-   Para completar el tablero, reemplazar aquí los bloques de cada sección:
-       contexto, variables, filtros, indicadores, visualizaciones,
-       conocimientos, limitacion, decision
-
-   Ejemplo:
-       {% block indicadores %}
-       <div class="row g-3">
-           <div class="col-md-4">{{ indicador("2.448.271", "Matrícula 2021", icono="bi-people") }}</div>
-       </div>
-       {% endblock %}
-
-   Los datos se envían desde la función temporal() de app.py. #}
+   Los indicadores, la tabla y las tres gráficas (matplotlib -> PNG en base64,
+   ver components/temporal.py) se recalculan en el servidor según los filtros
+   de la URL (?departamento=...&nivel=...). No hay imágenes sueltas ni dibujo
+   por JavaScript: cada solicitud genera las gráficas desde el CSV limpio. #}
 {% extends "dimensiones/_plantilla.html" %}
 {% from "partials/macros.html" import indicador, tarjeta_grafica, conocimiento %}
+
+{% block estilos %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/temporal.css') }}">
+{% endblock %}
+
+{% block contexto %}
+<p class="mt-3 mb-0">
+    Esta dimensión analiza la matrícula año a año entre {{ tablero.tabla[0].anio }}
+    y {{ tablero.tabla[-1].anio }}. Cada gráfica suma la matrícula de todos los
+    municipios en un año; los filtros permiten ver un departamento o un nivel
+    de formación en particular.
+</p>
+{% endblock %}
+
+{% block variables %}
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead><tr><th>Variable</th><th>Tipo</th><th>Uso en esta dimensión</th></tr></thead>
+        <tbody>
+            <tr><td><code>Año</code></td><td>Temporal</td><td>Eje de tiempo (2005–2021) de las tres gráficas.</td></tr>
+            <tr><td><code>Código del Departamento</code></td><td>Territorial</td><td>Filtro «Departamento».</td></tr>
+            <tr><td>Seis niveles de formación (técnica profesional, tecnológica, universitaria, especialización, maestría y doctorado)</td><td>Numérica</td><td>Filtro «Nivel de formación» y comparación de su evolución.</td></tr>
+            <tr><td><code>Matrícula Total</code></td><td>Numérica (derivada)</td><td>Suma de los seis niveles; base de los indicadores y de la variación anual.</td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block filtros %}
+<form method="get" id="filtros-temporal" class="row g-3 filtros-temporal">
+    <div class="col-md-6">
+        <label class="form-label" for="filtro-departamento"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>Departamento</label>
+        <select id="filtro-departamento" name="departamento" class="form-select" onchange="this.form.submit()">
+            {% for d in opciones.departamentos %}
+            <option value="{{ d }}" {{ "selected" if d == seleccion.departamento }}>{{ "Todos (nacional)" if d == "Todos" else d }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label" for="filtro-nivel"><i class="bi bi-mortarboard me-1" aria-hidden="true"></i>Nivel de formación</label>
+        <select id="filtro-nivel" name="nivel" class="form-select" onchange="this.form.submit()">
+            {% for clave, nombre in opciones.niveles.items() %}
+            <option value="{{ clave }}" {{ "selected" if clave == seleccion.nivel }}>{{ nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <noscript><div class="col-12"><button type="submit" class="btn btn-sm btn-outline-secondary">Aplicar filtros</button></div></noscript>
+</form>
+<p class="seleccion-actual mt-3 mb-0">
+    Mostrando: {{ "todo el país" if seleccion.departamento == "Todos" else seleccion.departamento }}
+    · {{ opciones.niveles[seleccion.nivel] }}.
+</p>
+{% endblock %}
+
+{% block indicadores %}
+<div class="row g-3">
+    <div class="col-md-4">{{ indicador(tablero.indicadores.ultimo.valor, tablero.indicadores.ultimo.etiqueta, icono="bi-people", detalle=tablero.indicadores.ultimo.detalle) }}</div>
+    <div class="col-md-4">{{ indicador(tablero.indicadores.crecimiento.valor, tablero.indicadores.crecimiento.etiqueta, icono="bi-graph-up-arrow", detalle=tablero.indicadores.crecimiento.detalle) }}</div>
+    <div class="col-md-4">{{ indicador(tablero.indicadores.mayor.valor, tablero.indicadores.mayor.etiqueta, icono="bi-calendar-event", detalle=tablero.indicadores.mayor.detalle) }}</div>
+</div>
+{% endblock %}
+
+{% block visualizaciones %}
+{% call tarjeta_grafica("Evolución anual de la matrícula",
+    "A escala nacional la matrícula se duplica entre 2005 y 2021 (de 1,20 a 2,45 millones). Crece todos los años hasta 2017, baja entre 2018 y 2020 y en 2021 marca el valor más alto del periodo.") %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.linea }}"
+         alt="Gráfica de línea de la matrícula por año, {{ seleccion.departamento }}, {{ opciones.niveles[seleccion.nivel] | lower }}.">
+{% endcall %}
+
+{% call tarjeta_grafica("Variación porcentual frente al año anterior",
+    "Los aumentos son la regla hasta 2017, con el pico en 2011 (+11,1 %). Solo 2018, 2019 y 2020 muestran caídas (−0,2 %, −1,8 % y −1,7 %) y 2021 vuelve a crecer (+3,9 %).") %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.variacion }}"
+         alt="Gráfica de barras de la variación anual de la matrícula. Las barras rojas son caídas.">
+{% endcall %}
+
+{% call tarjeta_grafica("Crecimiento anual promedio por periodo",
+    "El ritmo se frena por etapas: 7,6 % anual entre 2005 y 2011, 4,7 % entre 2011 y 2017 y prácticamente 0 % entre 2017 y 2021 (la matrícula de 2021 es casi igual a la de 2017).") %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.periodos }}"
+         alt="Gráfica de barras del crecimiento anual promedio en tres periodos.">
+{% endcall %}
+
+<details class="serie-tabla-temporal">
+    <summary>Ver los datos de la selección actual</summary>
+    <div class="table-responsive mt-2">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Año</th><th class="text-end">Matrícula</th><th class="text-end">Variación</th></tr></thead>
+            <tbody>
+                {% for fila in tablero.tabla %}
+                <tr><td>{{ fila.anio }}</td><td class="text-end">{{ fila.valor }}</td><td class="text-end">{{ fila.variacion }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</details>
+{% endblock %}
+
+{% block conocimientos %}
+{{ conocimiento(1,
+    pregunta="¿Cómo evolucionó la matrícula total entre 2005 y 2021?",
+    variables="Año y matrícula total (suma de los seis niveles), a escala nacional.",
+    procedimiento="Se sumó la matrícula de todos los municipios por año y se calculó la variación porcentual anual y la tasa de crecimiento anual compuesta.",
+    evidencia="Gráficas 1 y 2 e indicadores «Matrícula en 2021» y «Crecimiento 2005–2021».",
+    hallazgo="La matrícula se duplicó: pasó de 1.196.690 (2005) a 2.448.271 (2021), y creció cada año hasta 2017.",
+    interpretacion="Entre 2005 y 2017 la matrícula aumentó 104,4 % (unos 6,1 % anual), señal de una expansión sostenida de la educación superior.",
+    utilidad="Sirve de línea base para proyectar cupos y financiación futura.",
+    limitacion="Es matrícula agregada por municipio y año; no equivale a estudiantes únicos ni explica las causas del crecimiento.") }}
+
+{{ conocimiento(2,
+    pregunta="¿Hubo periodos de disminución o estancamiento?",
+    variables="Año y variación porcentual anual de la matrícula total.",
+    procedimiento="Se comparó cada año con el anterior y se contaron los años con variación negativa; luego se comparó el ritmo de tres periodos.",
+    evidencia="Gráficas 2 y 3.",
+    hallazgo="Entre 2017 y 2020 la matrícula bajó 3,7 % (de 2.446.314 a 2.355.603) tras tres años seguidos de caída; en 2021 se recuperó (+3,9 %).",
+    interpretacion="El crecimiento anual promedio pasó de 7,6 % (2005–2011) a 4,7 % (2011–2017) y a casi 0 % (2017–2021): el sistema dejó de expandirse al ritmo anterior.",
+    utilidad="Permite priorizar estrategias de permanencia y de atracción de nuevos estudiantes.",
+    limitacion="Con datos anuales no se puede saber si la caída de 2018–2020 fue temporal ni cuáles fueron sus causas.") }}
+
+{{ conocimiento(3,
+    pregunta="¿Cambió la composición de la matrícula por nivel de formación?",
+    variables="Año y matrícula de cada nivel de formación.",
+    procedimiento="Se filtró cada nivel (filtro «Nivel de formación») y se compararon 2005, el año de cambio y 2021.",
+    evidencia="Gráfica 1 con el filtro de nivel; datos de la tabla «Ver los datos».",
+    hallazgo="La tecnológica pasó de 13,3 % a 25,2 % de la matrícula (×3,9), maestría se multiplicó ×6,1 y la técnica profesional cayó de 224.026 (2008) a 92.941 (2010).",
+    interpretacion="La formación tecnológica y los posgrados ganan peso, mientras la técnica profesional pierde participación de forma abrupta desde 2009.",
+    utilidad="Orienta la oferta de programas hacia los niveles que más crecen.",
+    limitacion="El cambio brusco de 2009 podría deberse a reclasificación de programas; los datos no lo confirman.") }}
+{% endblock %}
+
+{% block limitacion %}
+<div class="alert alert-warning mb-0" role="note">
+    Los datos son anuales, así que no permiten analizar comportamientos estacionales
+    (trimestre o mes). Además, el número de municipios con registros cambia de un año
+    a otro (816 en 2012 y 360 en 2021), por lo que parte de las variaciones podría
+    reflejar cambios de cobertura y no solo de matrícula real. Tampoco se puede
+    concluir <em>por qué</em> ocurren los aumentos o las caídas.
+</div>
+{% endblock %}
+
+{% block decision %}
+<div class="card border-0 bg-transparent"><div class="card-body p-0">
+    <p class="mb-2"><strong>Posible decisión:</strong> como la matrícula total no crece desde 2017,
+    las instituciones y el Ministerio podrían destinar recursos a programas de permanencia
+    y a ampliar la oferta tecnológica y de posgrado, que son los niveles que más crecieron,
+    en lugar de solo aumentar cupos de pregrado universitario.</p>
+    <p class="mb-0 text-body-secondary">Sustento: crecimiento anual de 7,6 % (2005–2011) frente a
+    ~0 % (2017–2021), y participación de la tecnológica de 13,3 % a 25,2 %.</p>
+</div></div>
+{% endblock %}
