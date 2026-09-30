@@ -8,9 +8,10 @@ Ejecución local:
     python app.py
 """
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 from components.datos import resumen_general
+from components.temporal import opciones_temporales, tablero_temporal
 from components.sitio import (
     DATASET,
     DIMENSIONES,
@@ -79,7 +80,17 @@ def territorial():
 
 @app.route("/dimension/temporal")
 def temporal():
-    return render_dimension("temporal")
+    opciones = opciones_temporales()
+    seleccion = {
+        "departamento": request.args.get("departamento", "Todos"),
+        "nivel": request.args.get("nivel", "total"),
+    }
+    return render_dimension(
+        "temporal",
+        opciones=opciones,
+        seleccion=seleccion,
+        tablero=tablero_temporal(seleccion["departamento"], seleccion["nivel"]),
+    )
 
 
 @app.route("/dimension/multivariada")
