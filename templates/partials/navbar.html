@@ -1,0 +1,56 @@
+{# Menú de navegación compartido por todas las páginas (se incluye desde base.html).
+   Las dimensiones salen de components/sitio.py (variable global "dimensiones"). #}
+{% set en_dimension = request.endpoint in dimensiones | map(attribute="slug") | list %}
+<nav class="navbar navbar-expand-lg bg-primary sticky-top barra-principal" data-bs-theme="dark"
+     aria-label="Menú principal">
+    <div class="container">
+        <a class="navbar-brand marca" href="{{ url_for('inicio') }}">
+            <span class="marca-logo" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></span>
+            <span class="marca-texto">Matrícula<span class="marca-acento">ES</span></span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#menu-principal" aria-controls="menu-principal"
+                aria-expanded="false" aria-label="Mostrar menú">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="menu-principal">
+            <ul class="navbar-nav me-auto gap-lg-1">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'inicio' %}active{% endif %}"
+                       {% if request.endpoint == 'inicio' %}aria-current="page"{% endif %}
+                       href="{{ url_for('inicio') }}">
+                        <i class="bi bi-house-door me-1" aria-hidden="true"></i>Inicio
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {% if en_dimension %}active{% endif %}" href="#"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bar-chart-line me-1" aria-hidden="true"></i>Análisis de datos
+                    </a>
+                    <ul class="dropdown-menu menu-dimensiones shadow">
+                        {% for d in dimensiones %}
+                        <li>
+                            <a class="dropdown-item {% if request.endpoint == d.slug %}active{% endif %}"
+                               {% if request.endpoint == d.slug %}aria-current="page"{% endif %}
+                               href="{{ url_for(d.slug) }}" style="--color-dimension: {{ d.color }}">
+                                <span class="icono-dimension" aria-hidden="true"><i class="bi {{ d.icono }}"></i></span>
+                                <span>
+                                    <span class="d-block fw-semibold">{{ d.titulo }}</span>
+                                    <span class="d-block small texto-suave">{{ d.resumen | truncate(58) }}</span>
+                                </span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+
+            <button id="boton-tema" class="btn btn-outline-light btn-sm boton-tema" type="button"
+                    aria-label="Cambiar a modo oscuro" title="Cambiar a modo oscuro">
+                <i class="bi bi-moon-stars-fill" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
+</nav>

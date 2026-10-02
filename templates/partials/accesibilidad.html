@@ -1,0 +1,68 @@
+{# Componente de accesibilidad (se incluye desde base.html):
+   - Enlace para saltar directamente al contenido principal (teclado y lectores de pantalla).
+   - Botón flotante que abre un panel con ajustes de lectura. Las preferencias se
+     guardan en el navegador y se aplican en todas las páginas (ver
+     static/js/accesibilidad.js y static/css/accesibilidad.css). #}
+<a class="saltar-contenido" href="#contenido">Saltar al contenido principal</a>
+
+<button type="button" class="boton-flotante boton-accesibilidad"
+        data-bs-toggle="offcanvas" data-bs-target="#panel-accesibilidad"
+        aria-controls="panel-accesibilidad" title="Opciones de accesibilidad">
+    <i class="bi bi-universal-access-circle" aria-hidden="true"></i>
+    <span class="visually-hidden">Opciones de accesibilidad</span>
+</button>
+
+<div class="offcanvas offcanvas-start panel-accesibilidad" tabindex="-1" id="panel-accesibilidad"
+     aria-labelledby="panel-accesibilidad-titulo">
+    <div class="offcanvas-header">
+        <h2 class="offcanvas-title h5" id="panel-accesibilidad-titulo">
+            <i class="bi bi-universal-access me-2" aria-hidden="true"></i>Accesibilidad
+        </h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar panel"></button>
+    </div>
+    <div class="offcanvas-body">
+        <p class="texto-suave small">
+            Ajusta la lectura del sitio a tu gusto. Los cambios se guardan en este navegador.
+        </p>
+
+        <fieldset class="grupo-a11y">
+            <legend class="etiqueta-a11y">Tamaño del texto</legend>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-a11y-escala="-1"
+                        aria-label="Reducir tamaño del texto">
+                    <i class="bi bi-dash-lg" aria-hidden="true"></i> A
+                </button>
+                <output class="valor-escala flex-grow-1 text-center fw-semibold" id="valor-escala" aria-live="polite">100 %</output>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-a11y-escala="1"
+                        aria-label="Aumentar tamaño del texto">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> A
+                </button>
+            </div>
+        </fieldset>
+
+        <fieldset class="grupo-a11y">
+            <legend class="etiqueta-a11y">Lectura</legend>
+            {% for opcion, titulo, descripcion, icono in [
+                ("contraste", "Alto contraste", "Texto y bordes más marcados.", "bi-circle-half"),
+                ("subrayado", "Subrayar enlaces", "Distingue los enlaces sin depender del color.", "bi-link-45deg"),
+                ("espaciado", "Espaciado amplio", "Más espacio entre letras, palabras y líneas.", "bi-text-paragraph"),
+                ("legible", "Fuente de alta legibilidad", "Usa Atkinson Hyperlegible en todo el sitio.", "bi-fonts"),
+                ("sin-movimiento", "Reducir movimiento", "Desactiva animaciones y desplazamientos suaves.", "bi-pause-circle"),
+            ] %}
+            <div class="form-check form-switch opcion-a11y">
+                <input class="form-check-input" type="checkbox" role="switch"
+                       id="a11y-{{ opcion }}" data-a11y-opcion="{{ opcion }}"
+                       aria-describedby="a11y-{{ opcion }}-ayuda">
+                <label class="form-check-label" for="a11y-{{ opcion }}">
+                    <i class="bi {{ icono }} me-1" aria-hidden="true"></i>{{ titulo }}
+                </label>
+                <div class="form-text" id="a11y-{{ opcion }}-ayuda">{{ descripcion }}</div>
+            </div>
+            {% endfor %}
+        </fieldset>
+
+        <button type="button" class="btn btn-outline-secondary w-100" data-a11y-restablecer>
+            <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restablecer ajustes
+        </button>
+    </div>
+</div>

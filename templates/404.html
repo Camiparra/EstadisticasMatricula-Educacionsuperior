@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titulo %}Página no encontrada{% endblock %}
+
+{% block contenido %}
+<div class="pagina-error text-center mx-auto">
+    <p class="codigo-error" aria-hidden="true">404</p>
+    <h1 class="h2">Este municipio no aparece en el SNIES</h1>
+    <p class="texto-suave">
+        Como las filas marcadas "NO IDENTIFICADO" en el conjunto de datos, la página que
+        buscas no tiene ubicación conocida. Revisa la dirección o vuelve a una de estas secciones.
+    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+        <a class="btn btn-primary" href="{{ url_for('inicio') }}">
+            <i class="bi bi-house-door me-1" aria-hidden="true"></i>Ir al inicio
+        </a>
+        {% for d in dimensiones %}
+        <a class="btn btn-outline-primary" href="{{ url_for(d.slug) }}">{{ d.corto }}</a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

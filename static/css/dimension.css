@@ -1,0 +1,421 @@
+/* ==========================================================================
+   Páginas de dimensión: banda de encabezado, menú lateral y secciones.
+   El color de cada dimensión llega en la variable --color-dimension.
+   ========================================================================== */
+
+/* ---------- Banda de encabezado ---------- */
+
+.banda-dimension {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem 0 2.5rem;
+    color: #fff;
+    background:
+        radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.12) 1px, transparent 0) 0 0 / 22px 22px,
+        linear-gradient(120deg, var(--portada-inicio) 10%,
+                        color-mix(in srgb, var(--color-dimension) 70%, var(--portada-inicio)));
+}
+
+.banda-dimension::after {
+    content: "";
+    position: absolute;
+    right: -6rem;
+    top: -6rem;
+    width: 20rem;
+    height: 20rem;
+    border-radius: 50%;
+    background-color: var(--color-dimension);
+    filter: blur(80px);
+    opacity: 0.45;
+}
+
+.banda-dimension .container {
+    position: relative;
+    z-index: 1;
+}
+
+.banda-dimension .breadcrumb {
+    --bs-breadcrumb-divider-color: rgba(255, 255, 255, 0.6);
+    --bs-breadcrumb-item-active-color: #fff;
+    --bs-breadcrumb-bg: transparent;
+    --bs-breadcrumb-padding-x: 0;
+    --bs-breadcrumb-padding-y: 0;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+}
+
+.banda-dimension .breadcrumb-item,
+.banda-dimension .breadcrumb a {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.icono-banda {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    flex-shrink: 0;
+    border-radius: 1.3rem;
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-size: 2.1rem;
+    backdrop-filter: blur(6px);
+}
+
+.banda-dimension .antetitulo {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.titulo-banda {
+    font-size: clamp(1.9rem, 1.3rem + 2.2vw, 2.9rem);
+    font-weight: 800;
+}
+
+.responsable {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* ---------- Menú lateral ---------- */
+
+.menu-lateral-fijo {
+    position: sticky;
+    top: calc(var(--app-altura-menu) + 1.5rem);
+}
+
+@media (min-width: 992px) {
+    .menu-lateral {
+        max-height: calc(100vh - var(--app-altura-menu) - 3rem);
+        overflow-y: auto;
+    }
+}
+
+.menu-lateral.offcanvas-lg {
+    --bs-offcanvas-bg: var(--app-superficie);
+}
+
+.bloque-lateral {
+    padding: 1.25rem;
+    border-radius: var(--app-radio);
+    background-color: var(--app-superficie);
+    border: 1px solid var(--app-borde);
+    box-shadow: var(--app-sombra);
+}
+
+.bloque-lateral + .bloque-lateral {
+    margin-top: 1rem;
+}
+
+.titulo-lateral {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--app-texto-suave);
+    margin-bottom: 0.75rem;
+}
+
+.progreso-lectura {
+    height: 4px;
+    border-radius: 999px;
+    background-color: var(--app-superficie-2);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.progreso-lectura span {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background-color: var(--color-dimension);
+    transition: width 0.15s linear;
+}
+
+.lista-secciones,
+.lista-dimensiones {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.enlace-seccion,
+.enlace-dimension {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.6rem;
+    color: var(--bs-body-color);
+    text-decoration: none;
+    font-size: 0.925rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.enlace-seccion {
+    position: relative;
+}
+
+.enlace-seccion i {
+    color: var(--app-texto-suave);
+    transition: color 0.2s ease;
+}
+
+.enlace-seccion:hover,
+.enlace-dimension:hover {
+    background-color: var(--app-superficie-2);
+    color: var(--bs-body-color);
+}
+
+/* Sección visible en pantalla */
+.enlace-seccion.activa {
+    background-color: color-mix(in srgb, var(--color-dimension) 14%, transparent);
+    font-weight: 600;
+}
+
+.enlace-seccion.activa i {
+    color: var(--color-dimension);
+}
+
+.enlace-seccion.activa::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    bottom: 0.45rem;
+    width: 3px;
+    border-radius: 3px;
+    background-color: var(--color-dimension);
+}
+
+.enlace-dimension .icono-dimension {
+    width: 1.9rem;
+    height: 1.9rem;
+    font-size: 0.95rem;
+    border-radius: 0.55rem;
+}
+
+.enlace-dimension.actual {
+    font-weight: 700;
+    background-color: var(--app-superficie-2);
+}
+
+/* ---------- Secciones del tablero ---------- */
+
+.seccion-dimension {
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 1.25rem;
+    background-color: var(--app-superficie);
+    border: 1px solid var(--app-borde);
+    box-shadow: var(--app-sombra);
+}
+
+.titulo-seccion {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.45rem;
+    margin-bottom: 1.25rem;
+}
+
+.titulo-seccion i {
+    display: inline-grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.7rem;
+    background-color: color-mix(in srgb, var(--color-dimension) 15%, transparent);
+    color: var(--color-dimension);
+    font-size: 1.15rem;
+}
+
+.pregunta-destacada {
+    position: relative;
+    margin: 0 0 1.25rem;
+    padding: 1.25rem 1.5rem 1.25rem 3.5rem;
+    border-radius: var(--app-radio);
+    background-color: color-mix(in srgb, var(--color-dimension) 9%, transparent);
+    font-family: var(--fuente-titulos);
+    font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem);
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.pregunta-destacada::before {
+    content: "\201C";
+    position: absolute;
+    left: 1rem;
+    top: 0.2rem;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--color-dimension);
+}
+
+.alcance summary {
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--app-texto-suave);
+}
+
+/* Aviso de sección pendiente */
+.pendiente {
+    padding: 1.25rem 1.5rem;
+    border: 2px dashed color-mix(in srgb, var(--color-dimension) 45%, var(--app-borde));
+    border-radius: var(--app-radio);
+    background-color: color-mix(in srgb, var(--color-dimension) 5%, transparent);
+}
+
+.pendiente-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    color: var(--color-dimension-texto);
+}
+
+.pendiente-encabezado i {
+    animation: girar-reloj 3s ease-in-out infinite;
+}
+
+@keyframes girar-reloj {
+    0%, 70% { transform: rotate(0); }
+    100% { transform: rotate(180deg); }
+}
+
+.pendiente-lista {
+    margin: 0.75rem 0 0;
+    color: var(--app-texto-suave);
+}
+
+/* Tarjeta de visualización */
+.tarjeta-grafica {
+    margin: 0 0 1.5rem;
+    background-color: var(--app-superficie);
+}
+
+.titulo-grafica {
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.interpretacion {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border-left: 4px solid var(--color-dimension);
+    border-radius: 0 0.75rem 0.75rem 0;
+    background-color: var(--app-superficie-2);
+}
+
+.interpretacion-etiqueta {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-dimension-texto);
+    margin-bottom: 0.3rem;
+}
+
+/* Conocimiento evidente */
+.conocimiento {
+    position: relative;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+}
+
+.conocimiento-numero {
+    position: absolute;
+    right: 1.25rem;
+    top: 0.5rem;
+    font-family: var(--fuente-titulos);
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: color-mix(in srgb, var(--color-dimension) 22%, transparent);
+}
+
+.conocimiento-hallazgo {
+    padding-right: 4rem;
+    margin-bottom: 1rem;
+}
+
+.conocimiento-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.9rem 1.5rem;
+    margin: 0;
+}
+
+.conocimiento-campos dt {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-dimension-texto);
+}
+
+.conocimiento-campos dd {
+    margin: 0.15rem 0 0;
+}
+
+/* Navegación anterior / siguiente */
+.paginador-dimensiones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2.5rem;
+}
+
+.paginador-enlace {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.1rem 1.35rem;
+    border-radius: var(--app-radio);
+    border: 1px solid var(--app-borde);
+    background-color: var(--app-superficie);
+    color: var(--bs-body-color);
+    text-decoration: none;
+    transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.paginador-enlace:hover {
+    color: var(--bs-body-color);
+    border-color: var(--color-dimension);
+    transform: translateY(-3px);
+}
+
+.paginador-direccion {
+    font-size: 0.8rem;
+    color: var(--app-texto-suave);
+}
+
+.paginador-titulo {
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    color: var(--color-dimension-texto);
+}
+
+@media (max-width: 575.98px) {
+    .seccion-dimension {
+        padding: 1.4rem;
+    }
+
+    .paginador-dimensiones {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Tablero de la dimensión temporal:*/
+.filtros-temporal .form-label { font-weight: 700; color: var(--color-dimension-texto); }
+.seleccion-actual { font-size: 0.95rem; color: var(--app-texto-suave); }
+
+.grafica-generada {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.serie-tabla-temporal { margin-bottom: 1rem; }
+.serie-tabla-temporal summary { cursor: pointer; font-weight: 700; color: var(--color-dimension-texto); }

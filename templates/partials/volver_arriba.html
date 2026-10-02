@@ -1,0 +1,11 @@
+{# Botón para volver a la parte superior del contenido (se incluye desde base.html).
+   Aparece al desplazarse hacia abajo; el anillo muestra cuánto se ha leído de la
+   página. Al usarlo, el foco del teclado pasa al inicio del contenido principal. #}
+<button type="button" id="volver-arriba" class="boton-flotante volver-arriba"
+        aria-label="Volver al inicio del contenido" title="Volver arriba">
+    <svg class="anillo-progreso" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <circle class="anillo-pista" cx="24" cy="24" r="21"></circle>
+        <circle class="anillo-avance" cx="24" cy="24" r="21" pathLength="100"></circle>
+    </svg>
+    <i class="bi bi-arrow-up" aria-hidden="true"></i>
+</button>

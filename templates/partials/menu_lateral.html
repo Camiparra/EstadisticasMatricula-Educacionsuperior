@@ -1,0 +1,50 @@
+{# Menú lateral de las páginas de dimensión (se incluye desde dimensiones/_plantilla.html).
+   - En pantallas grandes queda fijo a la izquierda mientras se desplaza la página.
+   - En celulares se abre como panel deslizable con el botón "Secciones".
+   Resalta la sección visible (static/js/dimension.js). #}
+<button class="btn btn-outline-primary w-100 d-lg-none mb-3 boton-menu-lateral" type="button"
+        data-bs-toggle="offcanvas" data-bs-target="#menu-lateral" aria-controls="menu-lateral">
+    <i class="bi bi-layout-sidebar me-1" aria-hidden="true"></i>Secciones de la dimensión
+</button>
+
+<div class="offcanvas-lg offcanvas-start menu-lateral" tabindex="-1" id="menu-lateral"
+     aria-labelledby="menu-lateral-titulo">
+    <div class="offcanvas-header">
+        <h2 class="offcanvas-title h5" id="menu-lateral-titulo">{{ dimension.titulo }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#menu-lateral"
+                aria-label="Cerrar menú"></button>
+    </div>
+
+    <div class="offcanvas-body flex-column">
+        <nav aria-label="Secciones de la dimensión" class="bloque-lateral">
+            <p class="titulo-lateral">En esta página</p>
+            <div class="progreso-lectura" aria-hidden="true"><span id="progreso-dimension"></span></div>
+            <ol class="lista-secciones" id="lista-secciones">
+                {% for s in secciones %}
+                <li>
+                    <a href="#{{ s.id }}" class="enlace-seccion">
+                        <i class="bi {{ s.icono }}" aria-hidden="true"></i>
+                        <span>{{ s.titulo }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ol>
+        </nav>
+
+        <nav aria-label="Otras dimensiones" class="bloque-lateral">
+            <p class="titulo-lateral">Dimensiones</p>
+            <ul class="lista-dimensiones">
+                {% for d in dimensiones %}
+                <li>
+                    <a href="{{ url_for(d.slug) }}" style="--color-dimension: {{ d.color }}"
+                       class="enlace-dimension {% if d.slug == dimension.slug %}actual{% endif %}"
+                       {% if d.slug == dimension.slug %}aria-current="page"{% endif %}>
+                        <span class="icono-dimension" aria-hidden="true"><i class="bi {{ d.icono }}"></i></span>
+                        <span>{{ d.corto }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</div>

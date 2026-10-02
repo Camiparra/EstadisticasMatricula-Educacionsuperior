@@ -1,0 +1,154 @@
+{# Plantilla común de los cuatro tableros de dimensión.
+
+   Cada dimensión (poblacional.html, territorial.html, ...) extiende esta
+   plantilla y reemplaza SOLO los bloques de sus secciones:
+       contexto, variables, filtros, indicadores, visualizaciones,
+       conocimientos, limitacion, decision
+
+   Mientras un bloque no se reemplace, se muestra un aviso "Pendiente" con lo
+   que exige la guía para esa sección. Los componentes para llenarlas están en
+   partials/macros.html. #}
+{% extends "base.html" %}
+{% from "partials/macros.html" import pendiente %}
+
+{% block titulo %}{{ dimension.titulo }}{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dimension.css') }}">
+{% endblock %}
+
+{% block cuerpo %}
+<header class="banda-dimension" style="--color-dimension: {{ dimension.color }}">
+    <div class="container">
+        <nav aria-label="Ruta de navegación">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('inicio') }}">Inicio</a></li>
+                <li class="breadcrumb-item">Análisis de datos</li>
+                <li class="breadcrumb-item active" aria-current="page">{{ dimension.corto }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex flex-column flex-md-row gap-3 gap-md-4 align-items-md-center">
+            <span class="icono-banda" aria-hidden="true"><i class="bi {{ dimension.icono }}"></i></span>
+            <div>
+                <p class="antetitulo mb-1">Dimensión {{ dimension.numero }} de {{ dimensiones | length }}</p>
+                <h1 class="titulo-banda mb-2">{{ dimension.titulo }}</h1>
+                <p class="responsable mb-0">
+                    <i class="bi bi-person-badge me-1" aria-hidden="true"></i>
+                    Integrante {{ responsable.numero }} · {{ responsable.nombre }}
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container py-4 py-lg-5" style="--color-dimension: {{ dimension.color }}">
+    <div class="row g-4 g-xl-5">
+        <aside class="col-lg-3">
+            <div class="menu-lateral-fijo">
+                {% include "partials/menu_lateral.html" %}
+            </div>
+        </aside>
+
+        <div class="col-lg-9 contenido-dimension">
+
+            <section id="pregunta" class="seccion-dimension aparecer" aria-labelledby="pregunta-titulo">
+                <h2 id="pregunta-titulo" class="titulo-seccion">
+                    <i class="bi bi-question-circle" aria-hidden="true"></i>Pregunta de análisis
+                </h2>
+                <blockquote class="pregunta-destacada">{{ dimension.pregunta }}</blockquote>
+                <details class="alcance">
+                    <summary>Qué analiza esta dimensión</summary>
+                    <ul class="lista-chequeo">
+                        {% for punto in dimension.analiza %}
+                        <li>{{ punto }}</li>
+                        {% endfor %}
+                    </ul>
+                </details>
+                {% block contexto %}{% endblock %}
+            </section>
+
+            <section id="variables" class="seccion-dimension aparecer" aria-labelledby="variables-titulo">
+                <h2 id="variables-titulo" class="titulo-seccion">
+                    <i class="bi bi-table" aria-hidden="true"></i>Variables utilizadas
+                </h2>
+                {% block variables %}
+                {{ pendiente(responsable, ["Nombre de cada variable utilizada.", "Tipo (categórica, numérica, temporal o territorial).", "Para qué se usa en el análisis."]) }}
+                {% endblock %}
+            </section>
+
+            <section id="filtros" class="seccion-dimension aparecer" aria-labelledby="filtros-titulo">
+                <h2 id="filtros-titulo" class="titulo-seccion">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>Filtros
+                </h2>
+                {% block filtros %}
+                {{ pendiente(responsable, ["Dos filtros interactivos que actualicen los indicadores y las visualizaciones."]) }}
+                {% endblock %}
+            </section>
+
+            <section id="indicadores" class="seccion-dimension aparecer" aria-labelledby="indicadores-titulo">
+                <h2 id="indicadores-titulo" class="titulo-seccion">
+                    <i class="bi bi-speedometer2" aria-hidden="true"></i>Indicadores
+                </h2>
+                {% block indicadores %}
+                {{ pendiente(responsable, ["Tres indicadores calculados a partir del conjunto de datos."]) }}
+                {% endblock %}
+            </section>
+
+            <section id="visualizaciones" class="seccion-dimension aparecer" aria-labelledby="visualizaciones-titulo">
+                <h2 id="visualizaciones-titulo" class="titulo-seccion">
+                    <i class="bi bi-bar-chart-line" aria-hidden="true"></i>Visualizaciones
+                </h2>
+                {% block visualizaciones %}
+                {{ pendiente(responsable, ["Tres visualizaciones generadas con los datos descargados.", "Interpretación de cada visualización."]) }}
+                {% endblock %}
+            </section>
+
+            <section id="conocimientos" class="seccion-dimension aparecer" aria-labelledby="conocimientos-titulo">
+                <h2 id="conocimientos-titulo" class="titulo-seccion">
+                    <i class="bi bi-lightbulb" aria-hidden="true"></i>Conocimientos evidentes
+                </h2>
+                {% block conocimientos %}
+                {{ pendiente(responsable, ["Tres conocimientos evidentes.", "Cada uno con: pregunta, variables, procedimiento, evidencia, hallazgo, interpretación, utilidad y limitación."]) }}
+                {% endblock %}
+            </section>
+
+            <section id="limitacion" class="seccion-dimension aparecer" aria-labelledby="limitacion-titulo">
+                <h2 id="limitacion-titulo" class="titulo-seccion">
+                    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>Limitación
+                </h2>
+                {% block limitacion %}
+                {{ pendiente(responsable, ["Una limitación del análisis: qué no puede concluirse con estos datos."]) }}
+                {% endblock %}
+            </section>
+
+            <section id="decision" class="seccion-dimension aparecer" aria-labelledby="decision-titulo">
+                <h2 id="decision-titulo" class="titulo-seccion">
+                    <i class="bi bi-signpost-split" aria-hidden="true"></i>Decisión sustentada
+                </h2>
+                {% block decision %}
+                {{ pendiente(responsable, ["Una posible decisión sustentada en los datos."]) }}
+                {% endblock %}
+            </section>
+
+            <nav class="paginador-dimensiones" aria-label="Navegación entre dimensiones">
+                {% if anterior %}
+                <a class="paginador-enlace" href="{{ url_for(anterior.slug) }}" style="--color-dimension: {{ anterior.color }}">
+                    <span class="paginador-direccion"><i class="bi bi-arrow-left" aria-hidden="true"></i> Anterior</span>
+                    <span class="paginador-titulo">{{ anterior.titulo }}</span>
+                </a>
+                {% else %}<span></span>{% endif %}
+                {% if siguiente %}
+                <a class="paginador-enlace text-end" href="{{ url_for(siguiente.slug) }}" style="--color-dimension: {{ siguiente.color }}">
+                    <span class="paginador-direccion">Siguiente <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+                    <span class="paginador-titulo">{{ siguiente.titulo }}</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dimension.js') }}"></script>
+{% endblock %}

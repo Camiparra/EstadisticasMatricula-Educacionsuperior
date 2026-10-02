@@ -1,0 +1,87 @@
+{# Componentes reutilizables para los tableros de las dimensiones.
+
+   Uso dentro de una plantilla de dimensión:
+       {% from "partials/macros.html" import indicador, tarjeta_grafica, conocimiento %}
+
+       {{ indicador("2.448.271", "Matrícula total 2021", icono="bi-people", detalle="Suma de los seis niveles") }}
+
+       {% call tarjeta_grafica("Matrícula por departamento", "Bogotá concentra ...") %}
+           <div id="grafica-departamentos"></div>
+       {% endcall %}
+
+       {{ conocimiento(1, pregunta="...", variables="...", procedimiento="...", evidencia="...",
+                       hallazgo="...", interpretacion="...", utilidad="...", limitacion="...") }}
+#}
+
+{# Aviso de sección pendiente con la lista de lo que falta por hacer. #}
+{% macro pendiente(responsable, requisitos=[]) %}
+<div class="pendiente">
+    <div class="pendiente-encabezado">
+        <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+        <span>Pendiente · Integrante {{ responsable.numero }} ({{ responsable.nombre.split(" ")[0] }})</span>
+    </div>
+    {% if requisitos %}
+    <ul class="pendiente-lista">
+        {% for requisito in requisitos %}
+        <li>{{ requisito }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{# Tarjeta de indicador (KPI). #}
+{% macro indicador(valor, etiqueta, icono="bi-123", detalle=None) %}
+<div class="card indicador h-100">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="etiqueta">{{ etiqueta }}</div>
+            <span class="indicador-icono" aria-hidden="true"><i class="bi {{ icono }}"></i></span>
+        </div>
+        <div class="valor">{{ valor }}</div>
+        {% if detalle %}<div class="detalle">{{ detalle }}</div>{% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+{# Tarjeta que envuelve una visualización con su interpretación. #}
+{% macro tarjeta_grafica(titulo, interpretacion=None) %}
+<figure class="card tarjeta-grafica">
+    <div class="card-body">
+        <figcaption class="titulo-grafica">{{ titulo }}</figcaption>
+        <div class="cuerpo-grafica">{{ caller() }}</div>
+        {% if interpretacion %}
+        <div class="interpretacion">
+            <span class="interpretacion-etiqueta"><i class="bi bi-quote" aria-hidden="true"></i> Interpretación</span>
+            <p class="mb-0">{{ interpretacion }}</p>
+        </div>
+        {% endif %}
+    </div>
+</figure>
+{% endmacro %}
+
+{# Conocimiento evidente con la estructura exigida por la guía del proyecto. #}
+{% macro conocimiento(numero, pregunta, variables, procedimiento, evidencia, hallazgo,
+                      interpretacion, utilidad, limitacion) %}
+<article class="card conocimiento">
+    <div class="card-body">
+        <div class="conocimiento-numero" aria-hidden="true">{{ "%02d" % numero }}</div>
+        <h3 class="h5 conocimiento-hallazgo">
+            <span class="visually-hidden">Conocimiento {{ numero }}: </span>{{ hallazgo }}
+        </h3>
+        <dl class="conocimiento-campos">
+            {% for etiqueta, texto in [
+                ("Pregunta", pregunta), ("Variables", variables),
+                ("Procedimiento", procedimiento), ("Evidencia", evidencia),
+                ("Interpretación", interpretacion), ("Utilidad", utilidad),
+                ("Limitación", limitacion),
+            ] %}
+            <div>
+                <dt>{{ etiqueta }}</dt>
+                <dd>{{ texto }}</dd>
+            </div>
+            {% endfor %}
+        </dl>
+    </div>
+</article>
+{% endmacro %}
