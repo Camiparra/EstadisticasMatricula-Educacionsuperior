@@ -1,4 +1,4 @@
-﻿# Dimension poblacional
+﻿# Dimensión poblacional
 
 ## Responsable
 
@@ -6,142 +6,120 @@ Integrante 1
 
 ## Fuente de datos
 
-Ministerio de Educacion Nacional (MEN), estadisticas de matricula por municipio.
+Ministerio de Educación Nacional (MEN), estadísticas de matrícula por municipio.
 
-El dataset contiene informacion de matricula de educacion superior por municipio para el periodo 2005-2021.
+El dataset contiene información de matrícula de educación superior por municipio para el periodo 2005-2021.
 
 ## Indicadores poblacionales
 
-### Indicador 1. Matricula total por año
+### Indicador 1. Matrícula total por año
 
-Mide la cantidad total de estudiantes matriculados en educacion superior para cada año.
+Mide la cantidad total de estudiantes matriculados en educación superior para cada año. Se obtiene sumando los seis niveles de formación: técnica profesional, tecnológica, universitaria, especialización, maestría y doctorado.
 
-La matricula total se obtiene sumando los siguientes niveles de formacion:
+### Indicador 2. Matrícula por nivel de formación
 
-- Tecnica profesional
-- Tecnologica
-- Universitaria
-- Especializacion
-- Maestria
-- Doctorado
+Compara la cantidad de estudiantes matriculados en cada nivel de formación y permite ver cómo se distribuye la matrícula entre los niveles de educación superior.
 
-Este indicador permite observar la evolucion de la matricula a traves del tiempo.
+### Indicador 3. Matrícula total por municipio
 
-### Indicador 2. Matricula por nivel de formacion
-
-Compara la cantidad de estudiantes matriculados en cada nivel de formacion:
-
-- Tecnica profesional
-- Tecnologica
-- Universitaria
-- Especializacion
-- Maestria
-- Doctorado
-
-Este indicador permite identificar como se distribuye la matricula entre los diferentes niveles de educacion superior.
-
-### Indicador 3. Matricula total por municipio
-
-Mide la cantidad total de estudiantes matriculados en cada municipio durante el periodo analizado.
-
-Este indicador permite observar la distribucion territorial de la matricula y las diferencias entre municipios.
+Mide la cantidad total de estudiantes matriculados en cada municipio durante el periodo analizado y permite observar las diferencias territoriales.
 
 ## Visualizaciones
 
-Los tres indicadores se representaran mediante visualizaciones que permitan identificar tendencias, distribuciones y diferencias territoriales.
+Los tres indicadores se representarán mediante visualizaciones que permitan identificar tendencias, distribuciones y diferencias territoriales.
 
 ## Filtros interactivos
 
-Los tableros incluiran como minimo los siguientes filtros:
+Los tableros incluirán como mínimo los siguientes filtros:
 
 - Año
 - Departamento
 
 ## Consideraciones sobre los datos
 
-Las columnas de matricula utilizan el punto como separador de miles en los registros del archivo. Por esta razon, los valores deben convertirse correctamente antes de realizar las operaciones y visualizaciones.
+Las columnas de matrícula usan el punto como separador de miles, y algunos valores traen además coma decimal, por lo que se convirtieron antes de hacer los cálculos.
 
-La columna "Nombre del Departamento" contiene codigos de departamento en los registros revisados, por lo que esta caracteristica debe tenerse en cuenta durante la limpieza y el analisis.
+La columna "Nombre del Departamento" contiene códigos de departamento en los registros revisados, por lo que el filtro por departamento se hizo con el código.
+
+El archivo original traía registros repetidos: el mismo municipio y año aparecía dos veces con exactamente los mismos valores, pero con el nombre escrito distinto (por ejemplo, "BOGOTÁ D.C." y "Bogotá, D.C."). Por eso los totales de la primera versión estaban inflados en los años 2005-2020. Se eliminaron las filas repetidas comparando año, código del municipio y todos los valores de matrícula. Se pasó de 19.618 a 9.989 filas y el resultado se guardó en `data/matricula_limpia.csv`.
+
+## Resultados
+
+### Indicador 1. Matrícula total por año
+
+| Año | Matrícula total |
+|---:|---:|
+| 2005 | 1.196.690 |
+| 2006 | 1.281.681 |
+| 2007 | 1.362.509 |
+| 2008 | 1.491.531 |
+| 2009 | 1.593.211 |
+| 2010 | 1.674.021 |
+| 2011 | 1.859.692 |
+| 2012 | 1.929.587 |
+| 2013 | 2.092.891 |
+| 2014 | 2.220.652 |
+| 2015 | 2.293.550 |
+| 2016 | 2.394.434 |
+| 2017 | 2.446.314 |
+| 2018 | 2.440.367 |
+| 2019 | 2.396.250 |
+| 2020 | 2.355.603 |
+| 2021 | 2.448.271 |
+
+La matrícula pasó de 1.196.690 en 2005 a 2.448.271 en 2021, es decir, se duplicó en el periodo. El valor más alto es el de 2021, aunque casi igual al de 2017.
+
+### Indicador 2. Matrícula por nivel de formación
+
+Matrícula acumulada durante el periodo 2005-2021:
+
+| Nivel de formación | Matrícula acumulada |
+|---|---:|
+| Universitaria | 21.393.992 |
+| Tecnológica | 8.107.942 |
+| Técnica profesional | 1.876.352 |
+| Especialización | 1.328.761 |
+| Maestría | 703.621 |
+| Doctorado | 66.585 |
+
+La formación universitaria concentra cerca del 64 % de la matrícula acumulada y la tecnológica cerca del 24 %. Doctorado es el nivel con menos matrícula.
+
+### Indicador 3. Matrícula por municipio
+
+El cálculo se hizo con el código del municipio como identificador, para que las diferentes formas de escribir un nombre no se cuenten como municipios distintos.
+
+Los diez municipios con mayor matrícula acumulada son:
+
+| Municipio | Matrícula acumulada |
+|---|---:|
+| Bogotá D.C. | 10.739.236 |
+| Medellín | 3.609.838 |
+| Cali | 1.847.369 |
+| Barranquilla | 1.745.912 |
+| Bucaramanga | 1.468.865 |
+| Cartagena de Indias | 1.022.205 |
+| Pereira | 633.773 |
+| Manizales | 632.345 |
+| San José de Cúcuta | 591.760 |
+| Ibagué | 583.790 |
+
+Bogotá concentra cerca de la tercera parte de la matrícula acumulada, y los diez municipios de la tabla suman más de dos terceras partes. La matrícula está muy concentrada en las grandes ciudades.
+
+## Observaciones
+
+- La matrícula crece de forma sostenida entre 2005 y 2017.
+- Entre 2017 y 2021 se mantiene alrededor de 2,4 millones, con una baja leve en 2019 y 2020 y una recuperación en 2021.
+- La matrícula universitaria es la más grande, seguida por la tecnológica.
+- La matrícula se concentra en pocos municipios, sobre todo Bogotá y Medellín.
+
+## Limitaciones y nota metodológica
+
+La matrícula acumulada corresponde a la suma de los registros del periodo 2005-2021 y no representa el número de estudiantes únicos, porque una misma persona se cuenta en cada año que está matriculada.
+
+Algunos municipios aparecen más de una vez en el mismo año con valores distintos (por ejemplo, con distinto número de IES). No se tomaron como duplicados y se sumaron, porque parecen reportes parciales del mismo municipio. Por eso una fila del dataset no equivale a un municipio.
+
+Dos registros de 2012 (Bogotá y Cartagena) traen valores con decimales, lo cual no tiene sentido en una cantidad de personas. Se dejaron tal cual porque la diferencia en el total es menor a una persona, y por eso el total de 2012 se muestra redondeado.
 
 ## Estado
 
-Indicadores definidos. Pendiente desarrollar las visualizaciones, filtros e interpretacion de resultados.
-
-## Resultados iniciales
-
-### Indicador 1. Matricula total por año
-
-La matricula total calculada para cada año es:
-
-| Año | Matricula total |
-|---:|---:|
-| 2005 | 2.393.380 |
-| 2006 | 2.563.362 |
-| 2007 | 2.725.018 |
-| 2008 | 2.983.062 |
-| 2009 | 3.186.422 |
-| 2010 | 3.348.042 |
-| 2011 | 3.719.384 |
-| 2012 | 2.766.502 |
-| 2013 | 4.185.782 |
-| 2014 | 4.441.304 |
-| 2015 | 4.587.100 |
-| 2016 | 4.788.868 |
-| 2017 | 4.892.628 |
-| 2018 | 4.880.734 |
-| 2019 | 4.792.500 |
-| 2020 | 4.711.206 |
-| 2021 | 2.448.271 |
-
-El valor mas alto del periodo se presenta en 2017, con 4.892.628 matriculas registradas.
-
-### Indicador 2. Matricula por nivel de formacion
-
-La matricula acumulada durante el periodo 2005-2021 es:
-
-| Nivel de formacion | Matricula acumulada |
-|---|---:|
-| Universitaria | 40.388.421 |
-| Tecnologica | 15.339.173 |
-| Tecnica profesional | 3.678.606 |
-| Especializacion | 2.546.736 |
-| Maestria | 1.334.433 |
-| Doctorado | 126.196 |
-
-La formacion universitaria concentra la mayor cantidad de matriculas registradas en el periodo, mientras que doctorado presenta la menor cantidad.
-
-### Indicador 3. Matricula por municipio
-
-Para evitar duplicaciones causadas por diferentes formas de escritura del nombre de un municipio, el calculo se realizo utilizando el codigo del municipio como identificador.
-
-Los diez municipios con mayor matricula acumulada son:
-
-| Municipio | Matricula acumulada |
-|---|---:|
-| Bogota D.C. | 19.622.795 |
-| Medellin | 6.969.681 |
-| Cali | 3.567.797 |
-| Barranquilla | 3.368.937 |
-| Bucaramanga | 2.840.590 |
-| Cartagena de Indias | 1.902.117 |
-| Manizales | 1.222.797 |
-| Pereira | 1.222.693 |
-| San Jose de Cucuta | 1.141.300 |
-| Ibague | 1.129.117 |
-
-Los resultados muestran una concentracion importante de la matricula acumulada en municipios con grandes centros urbanos y amplia oferta de educacion superior.
-
-## Observaciones iniciales
-
-- La matricula presenta una tendencia general de crecimiento entre 2005 y 2017, aunque existen variaciones en algunos años.
-- La matricula universitaria representa la mayor cantidad acumulada entre los niveles de formacion analizados.
-- La matricula esta concentrada en un grupo reducido de municipios, especialmente Bogota y Medellin.
-- El valor registrado para 2021 presenta una disminucion considerable frente a los años inmediatamente anteriores. El dataset por si solo no permite establecer la causa de esta variacion.
-
-## Nota metodologica
-
-Los valores de matricula fueron interpretados considerando el punto como separador de miles, de acuerdo con el formato indicado en la documentacion del dataset.
-
-La matricula acumulada por municipio corresponde a la suma de los registros del periodo 2005-2021 y no representa el numero de estudiantes unicos.
-
-El codigo del municipio se utilizo como identificador para evitar que diferentes formas de escritura del mismo municipio fueran tratadas como entidades diferentes.
+Indicadores calculados con los datos limpios. Pendiente desarrollar las visualizaciones, los filtros y la interpretación en el tablero.
