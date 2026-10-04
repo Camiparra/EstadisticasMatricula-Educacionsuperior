@@ -13,6 +13,7 @@ from flask import Flask, render_template, request
 from components.datos import resumen_general
 from components.multivariada import opciones_multivariadas, tablero_multivariado
 from components.temporal import opciones_temporales, tablero_temporal
+from components.poblacional import opciones_poblacionales, tablero_poblacional
 from components.territorial import conocimientos_territoriales, opciones_territoriales, tablero_territorial
 from components.sitio import (
     DATASET,
@@ -72,7 +73,16 @@ def inicio():
 
 @app.route("/dimension/poblacional")
 def poblacional():
-    return render_dimension("poblacional")
+    seleccion = {
+        "anio": request.args.get("anio", "Todos"),
+        "departamento": request.args.get("departamento", "Todos"),
+    }
+    return render_dimension(
+        "poblacional",
+        opciones=opciones_poblacionales(),
+        seleccion=seleccion,
+        tablero=tablero_poblacional(seleccion["anio"], seleccion["departamento"]),
+    )
 
 
 @app.route("/dimension/territorial")
