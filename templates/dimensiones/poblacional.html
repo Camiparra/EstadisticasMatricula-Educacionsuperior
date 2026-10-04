@@ -1,17 +1,138 @@
 {# Tablero de la dimensión poblacional — Integrante 1 (Camila).
-
-   Esta página hereda la estructura común de dimensiones/_plantilla.html.
-   Para completar el tablero, reemplazar aquí los bloques de cada sección:
-       contexto, variables, filtros, indicadores, visualizaciones,
-       conocimientos, limitacion, decision
-
-   Ejemplo:
-       {% block indicadores %}
-       <div class="row g-3">
-           <div class="col-md-4">{{ indicador("2.448.271", "Matrícula 2021", icono="bi-people") }}</div>
-       </div>
-       {% endblock %}
-
-   Los datos se envían desde la función poblacional() de app.py. #}
+   Indicadores, tabla y gráficas (matplotlib -> PNG en base64, ver
+   components/poblacional.py) se recalculan en el servidor según los filtros
+   de la URL (?anio=...&departamento=...). #}
 {% extends "dimensiones/_plantilla.html" %}
 {% from "partials/macros.html" import indicador, tarjeta_grafica, conocimiento %}
+
+{% block estilos %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/temporal.css') }}">
+<style>
+    #indicadores .indicador .valor {
+        font-size: clamp(1.3rem, 2.3vw, 1.8rem);
+        line-height: 1.15;
+        overflow-wrap: normal;
+        word-break: normal;
+        hyphens: none;
+    }
+</style>
+{% endblock %}
+
+{% block contexto %}
+<p class="mt-3 mb-0 text-body-secondary">
+    Los indicadores, las gráficas y los conocimientos evidentes de esta página
+    describen cómo está compuesta la matrícula (niveles de formación) y cómo se
+    distribuye entre municipios. Los filtros permiten ver un año o un departamento.
+    Cuando no hay año elegido, se suman todos los años, así que una misma persona
+    puede contarse varias veces.
+</p>
+{% endblock %}
+
+{% block variables %}
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead><tr><th>Variable</th><th>Tipo</th><th>Uso en esta dimensión</th></tr></thead>
+        <tbody>
+            <tr><td><code>Año</code></td><td>Temporal</td><td>Filtro «Año» (2005–2021).</td></tr>
+            <tr><td><code>Código del Departamento</code></td><td>Territorial</td><td>Filtro «Departamento» (se muestra con su nombre).</td></tr>
+            <tr><td><code>Código y Nombre del Municipio</code></td><td>Territorial</td><td>Agrupar la matrícula por municipio y clasificarlos por tamaño.</td></tr>
+            <tr><td>Seis niveles de formación (técnica profesional, tecnológica, universitaria, especialización, maestría y doctorado)</td><td>Numérica</td><td>Composición de la matrícula por nivel.</td></tr>
+            <tr><td><code>Matrícula Total</code></td><td>Numérica (derivada)</td><td>Suma de los seis niveles; base de los indicadores y los porcentajes.</td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block filtros %}
+<form method="get" id="filtros-poblacional" class="row g-3 filtros-temporal">
+    <div class="col-md-6">
+        <label class="form-label" for="filtro-anio"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>Año</label>
+        <select id="filtro-anio" name="anio" class="form-select" onchange="this.form.submit()">
+            {% for a in opciones.anios %}
+            <option value="{{ a }}" {{ "selected" if a == seleccion.anio }}>{{ "Todos los años" if a == "Todos" else a }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label" for="filtro-departamento"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>Departamento</label>
+        <select id="filtro-departamento" name="departamento" class="form-select" onchange="this.form.submit()">
+            {% for d in opciones.departamentos %}
+            <option value="{{ d }}" {{ "selected" if d == seleccion.departamento }}>{{ "Todos (nacional)" if d == "Todos" else d }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <noscript><div class="col-12"><button type="submit" class="btn btn-sm btn-outline-secondary">Aplicar filtros</button></div></noscript>
+</form>
+<p class="seleccion-actual mt-3 mb-0">
+    Mostrando: {{ "todos los años" if seleccion.anio == "Todos" else "el año " ~ seleccion.anio }}
+    · {{ "todo el país" if seleccion.departamento == "Todos" else seleccion.departamento }}.
+</p>
+{% endblock %}
+
+{% block indicadores %}
+<div class="row g-3">
+    <div class="col-md-4">{{ indicador(tablero.indicadores.total.valor, tablero.indicadores.total.etiqueta, icono="bi-people", detalle=tablero.indicadores.total.detalle) }}</div>
+    <div class="col-md-4">{{ indicador(tablero.indicadores.nivel.valor, tablero.indicadores.nivel.etiqueta, icono="bi-mortarboard", detalle=tablero.indicadores.nivel.detalle) }}</div>
+    <div class="col-md-4">{{ indicador(tablero.indicadores.municipio.valor, tablero.indicadores.municipio.etiqueta, icono="bi-geo-alt", detalle=tablero.indicadores.municipio.detalle) }}</div>
+</div>
+{% endblock %}
+
+{% block visualizaciones %}
+{% call tarjeta_grafica("Matrícula por nivel de formación", tablero.interpretaciones.niveles) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.niveles }}"
+         alt="Barras horizontales de la matrícula por nivel de formación, con su porcentaje.">
+{% endcall %}
+
+{% call tarjeta_grafica("Diez municipios con mayor matrícula", tablero.interpretaciones.municipios) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.municipios }}"
+         alt="Barras horizontales de los diez municipios con mayor matrícula, con su porcentaje.">
+{% endcall %}
+
+{% call tarjeta_grafica("Municipios según el tamaño de su matrícula", tablero.interpretaciones.tamanos) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.tamanos }}"
+         alt="Barras con el número de municipios en cada rango de tamaño de matrícula.">
+{% endcall %}
+
+<details class="serie-tabla-temporal">
+    <summary>Ver los datos de la selección actual</summary>
+    <div class="table-responsive mt-2">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Nivel de formación</th><th class="text-end">Matrícula</th><th class="text-end">Participación</th></tr></thead>
+            <tbody>
+                {% for fila in tablero.tabla %}
+                <tr><td>{{ fila.nivel }}</td><td class="text-end">{{ fila.matricula }}</td><td class="text-end">{{ fila.porcentaje }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</details>
+{% endblock %}
+
+{% block conocimientos %}
+{% set kn = tablero.conocimientos %}
+{{ conocimiento(1, **kn[1]) }}
+{{ conocimiento(2, **kn[2]) }}
+{{ conocimiento(3, **kn[3]) }}
+{% endblock %}
+
+{% block limitacion %}
+<div class="alert alert-warning mb-0" role="note">
+    La matrícula acumulada cuenta a una persona cada año que está matriculada, así que
+    no equivale a estudiantes únicos. Algunos municipios aparecen en varias filas del
+    mismo año con cifras distintas y por eso se suman. Además, el conjunto no trae la
+    población de cada municipio ni datos de deserción o graduación, así que no permite
+    medir cobertura ni explicar por qué la matrícula se concentra.
+</div>
+{% endblock %}
+
+{% block decision %}
+<div class="card border-0 bg-transparent"><div class="card-body p-0">
+    <p class="mb-2"><strong>Posible decisión:</strong> como los diez municipios con más matrícula
+    reúnen {{ tablero.conocimientos.resumen.top10 }} del total, una entidad de educación podría
+    priorizar sedes regionales, becas o programas a distancia en los municipios con menos matrícula,
+    en lugar de seguir ampliando la oferta solo en las grandes ciudades.</p>
+    <p class="mb-0 text-body-secondary">Sustento: la concentración territorial de la matrícula y el
+    peso de la formación universitaria ({{ tablero.conocimientos.resumen.universitaria }} del total).</p>
+</div></div>
+{% endblock %}
