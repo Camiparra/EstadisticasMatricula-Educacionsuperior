@@ -12,6 +12,7 @@ from flask import Flask, render_template, request
 
 from components.datos import resumen_general
 from components.temporal import opciones_temporales, tablero_temporal
+from components.territorial import conocimientos_territoriales, opciones_territoriales, tablero_territorial
 from components.sitio import (
     DATASET,
     DIMENSIONES,
@@ -75,7 +76,17 @@ def poblacional():
 
 @app.route("/dimension/territorial")
 def territorial():
-    return render_dimension("territorial")
+    opciones = opciones_territoriales()
+    anio = request.args.get("anio", type=int, default=opciones["anio_final"])
+    departamento = request.args.get("departamento", "Todos")
+    return render_dimension(
+        "territorial",
+        opciones=opciones,
+        # tablero_territorial corrige año o departamento inválidos y devuelve
+        # la selección final en tablero["seleccion"].
+        tablero=tablero_territorial(anio, departamento),
+        saberes=conocimientos_territoriales(),
+    )
 
 
 @app.route("/dimension/temporal")
