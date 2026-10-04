@@ -1,17 +1,168 @@
-{# Tablero de la dimensión multivariada — Integrante 4 (Richard).
-
-   Esta página hereda la estructura común de dimensiones/_plantilla.html.
-   Para completar el tablero, reemplazar aquí los bloques de cada sección:
-       contexto, variables, filtros, indicadores, visualizaciones,
-       conocimientos, limitacion, decision
-
-   Ejemplo:
-       {% block indicadores %}
-       <div class="row g-3">
-           <div class="col-md-4">{{ indicador("2.448.271", "Matrícula 2021", icono="bi-people") }}</div>
-       </div>
-       {% endblock %}
-
-   Los datos se envían desde la función multivariada() de app.py. #}
+{# Tablero relacional y multivariado — Integrante 4 (Richard). #}
 {% extends "dimensiones/_plantilla.html" %}
 {% from "partials/macros.html" import indicador, tarjeta_grafica, conocimiento %}
+
+{% block contexto %}
+<p class="mt-3 mb-0">
+    Este tablero cruza departamento, nivel de formación, municipio y año a partir
+    del CSV del MEN/SNIES. Los filtros permiten comparar la matrícula acumulada
+    y su evolución entre {{ tablero.seleccion.anio_inicio }} y
+    {{ tablero.seleccion.anio_fin }}. Para relacionar matrícula e instituciones,
+    se agregan los registros municipales por año y se conserva la mayor cifra
+    de IES reportada en cada municipio-año para evitar contarla varias veces.
+</p>
+{% endblock %}
+
+{% block variables %}
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead><tr><th>Variable</th><th>Tipo</th><th>Uso en el análisis</th></tr></thead>
+        <tbody>
+            <tr><td><code>AÑO</code></td><td>Temporal</td><td>Filtro del periodo y comparación de tendencias.</td></tr>
+            <tr><td><code>Departamento</code></td><td>Territorial (categórica)</td><td>Comparación de matrícula entre territorios.</td></tr>
+            <tr><td><code>Municipio</code></td><td>Territorial (categórica)</td><td>Unidad de observación para contrastar matrícula e IES con oferta.</td></tr>
+            <tr><td>Seis niveles de formación</td><td>Numéricas</td><td>Desagregan la matrícula en técnica profesional, tecnológica, universitaria, especialización, maestría y doctorado.</td></tr>
+            <tr><td><code>Matrícula total</code></td><td>Numérica (derivada)</td><td>Suma de los seis niveles cuando se seleccionan todos.</td></tr>
+            <tr><td><code>IES con oferta</code></td><td>Numérica</td><td>Se compara con la matrícula promedio anual de cada municipio.</td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block filtros %}
+<form method="get" action="{{ url_for('multivariada') }}#filtros"
+      id="filtros-multivariada" class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label" for="filtro-departamento">
+            <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>Departamento
+        </label>
+        <select id="filtro-departamento" name="departamento" class="form-select">
+            {% for departamento in opciones.departamentos %}
+            <option value="{{ departamento }}" {{ "selected" if departamento == seleccion.departamento }}>
+                {{ "Todos (nacional)" if departamento == "Todos" else departamento }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label" for="filtro-nivel">
+            <i class="bi bi-mortarboard me-1" aria-hidden="true"></i>Nivel de formación
+        </label>
+        <select id="filtro-nivel" name="nivel" class="form-select">
+            {% for clave, nombre in opciones.niveles.items() %}
+            <option value="{{ clave }}" {{ "selected" if clave == seleccion.nivel }}>{{ nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label" for="filtro-anio-inicio">Año inicial</label>
+        <select id="filtro-anio-inicio" name="anio_inicio" class="form-select">
+            {% for anio in opciones.anios %}
+            <option value="{{ anio }}" {{ "selected" if anio == seleccion.anio_inicio }}>{{ anio }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label" for="filtro-anio-fin">Año final</label>
+        <select id="filtro-anio-fin" name="anio_fin" class="form-select">
+            {% for anio in opciones.anios %}
+            <option value="{{ anio }}" {{ "selected" if anio == seleccion.anio_fin }}>{{ anio }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search me-1" aria-hidden="true"></i>Buscar
+        </button>
+    </div>
+</form>
+<p class="seleccion-actual mt-3 mb-0">
+    Selección: {{ "todo el país" if tablero.seleccion.departamento == "Todos" else tablero.seleccion.departamento }}
+    · {{ opciones.niveles[tablero.seleccion.nivel] }}
+    · {{ tablero.seleccion.anio_inicio }}–{{ tablero.seleccion.anio_fin }}.
+</p>
+{% endblock %}
+
+{% block indicadores %}
+<div class="row g-3">
+    <div class="col-md-4">{{ indicador(tablero.indicadores.matricula.valor, tablero.indicadores.matricula.etiqueta, icono="bi-people", detalle=tablero.indicadores.matricula.detalle) }}</div>
+    <div class="col-md-4">{{ indicador(tablero.indicadores.municipios.valor, tablero.indicadores.municipios.etiqueta, icono="bi-geo", detalle=tablero.indicadores.municipios.detalle) }}</div>
+    <div class="col-md-4">{{ indicador(tablero.indicadores.cruce.valor, tablero.indicadores.cruce.etiqueta, icono="bi-diagram-3", detalle=tablero.indicadores.cruce.detalle) }}</div>
+</div>
+{% endblock %}
+
+{% block visualizaciones %}
+{% call tarjeta_grafica("Cruce de matrícula por departamento y nivel",
+    tablero.interpretaciones.cruce) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.cruce }}"
+         alt="Mapa de calor de matrícula por departamento y nivel de formación para el periodo seleccionado.">
+{% endcall %}
+
+{% call tarjeta_grafica("Evolución anual según nivel de formación",
+    tablero.interpretaciones.evolucion) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.evolucion }}"
+         alt="Gráfica de líneas de matrícula anual por nivel de formación y territorio seleccionado.">
+{% endcall %}
+
+{% call tarjeta_grafica("Matrícula e IES con oferta por municipio",
+    tablero.interpretaciones.municipios) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.municipios }}"
+         alt="Diagrama de dispersión entre matrícula promedio anual e IES con oferta promedio anual por municipio.">
+{% endcall %}
+{% endblock %}
+
+{% block conocimientos %}
+{{ conocimiento(1,
+    pregunta="¿Qué combinación de territorio, nivel y año reúne más matrícula?",
+    variables="Departamento, nivel de formación, año y matriculados.",
+    procedimiento="Se agruparon los registros por departamento, nivel y año dentro del periodo y filtros elegidos; se ordenaron las sumas de mayor a menor.",
+    evidencia=tablero.conocimientos.cruce.evidencia,
+    hallazgo=tablero.conocimientos.cruce.hallazgo,
+    interpretacion="La combinación muestra dónde y en qué nivel se concentra la mayor cantidad observada dentro de la selección; no representa por sí sola una tasa de acceso.",
+    utilidad="Puede orientar una revisión de capacidad y oferta en los territorios y niveles con mayor volumen.",
+    limitacion="La matrícula está agregada y no identifica estudiantes únicos; el volumen también depende del tamaño del territorio.") }}
+
+{{ conocimiento(2,
+    pregunta="¿Qué nivel concentra la mayor parte de la matrícula en el territorio y periodo seleccionados?",
+    variables="Departamento, año, nivel de formación y matriculados.",
+    procedimiento="Se sumaron los matriculados por nivel y se calculó la participación de cada suma sobre el total del periodo.",
+    evidencia=tablero.conocimientos.composicion.evidencia,
+    hallazgo=tablero.conocimientos.composicion.hallazgo,
+    interpretacion="La composición permite comparar el peso relativo de los niveles sin confundirlo con el tamaño absoluto de cada departamento.",
+    utilidad="Apoya la planeación de programas y cupos según la composición observada, junto con información de capacidad institucional.",
+    limitacion="Una mayor participación no demuestra mayor calidad, demanda futura ni mejores resultados académicos.") }}
+
+{{ conocimiento(3,
+    pregunta="¿Hay municipios con matrícula por IES muy superior a la del resto?",
+    variables="Municipio, departamento, año, matrícula del nivel seleccionado (o total) e IES con oferta.",
+    procedimiento="Se sumó la matrícula por municipio-año, se tomó la mayor cantidad de IES reportada en cada municipio-año y se promediaron ambos valores entre años. Se marcaron como posibles valores inusuales los cocientes matrícula/IES por encima de Q3 + 1,5 × rango intercuartílico.",
+    evidencia="{{ tablero.conocimientos.inusuales.hallazgo }} Mayor cociente observado: {{ tablero.conocimientos.inusuales.municipio }}",
+    hallazgo=tablero.conocimientos.inusuales.hallazgo,
+    interpretacion="Un valor alto identifica una diferencia que merece revisión, no necesariamente una anomalía real: también puede reflejar cobertura o registro desigual de IES.",
+    utilidad="Permite priorizar la validación de registros y estudiar dónde podría requerirse ampliar la capacidad de oferta.",
+    limitacion="El cociente es descriptivo y no mide capacidad, calidad ni carga efectiva por institución; el promedio oculta variaciones entre años.") }}
+{% endblock %}
+
+{% block limitacion %}
+<div class="alert alert-warning mb-0" role="note">
+    El conjunto contiene agregados por municipio y año, no microdatos de estudiantes;
+    por ello no se pueden inferir trayectorias individuales ni causas de las diferencias.
+    Además, la cobertura municipal cambia entre años y el campo «IES con oferta» no
+    informa capacidad, cupos ni matrícula por institución. Los posibles valores
+    inusuales se deben validar antes de usarlos como evidencia de una brecha real.
+</div>
+{% endblock %}
+
+{% block decision %}
+<div class="card border-0 bg-transparent"><div class="card-body p-0">
+    <p class="mb-2"><strong>Posible decisión:</strong> usar los cruces filtrados para priorizar
+    una revisión de oferta y capacidad en los municipios y niveles que concentran matrícula
+    o que aparecen por encima del umbral intercuartílico de matrícula por IES-año.</p>
+    <p class="mb-0 text-body-secondary">
+        Sustento: el tablero identifica la combinación departamento–nivel–año de mayor
+        matrícula, la composición por nivel y los municipios señalados como posibles
+        valores inusuales. Antes de reasignar recursos, contrastar estos resultados con
+        cupos, capacidad institucional y cobertura de cada año.
+    </p>
+</div></div>
+{% endblock %}
