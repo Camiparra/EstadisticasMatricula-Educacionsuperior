@@ -68,3 +68,47 @@
 
     actualizar();
 })();
+
+// Filtros sin recarga: intercepta form.submit() de los onchange y reemplaza
+// solo las secciones dinámicas (#indicadores y #visualizaciones) con fetch.
+(function () {
+    var formularios = document.querySelectorAll('form[id^="filtros-"]');
+    if (!formularios.length) return;
+
+    var SECCIONES = ['#indicadores', '#visualizaciones', '.seleccion-actual', '.pie-filtros'];
+
+    function setOpacity(val) {
+        ['#indicadores', '#visualizaciones'].forEach(function (sel) {
+            var el = document.querySelector(sel);
+            if (el) { el.style.opacity = val; el.style.pointerEvents = val === '0.45' ? 'none' : ''; }
+        });
+    }
+
+    function aplicarFiltro(form) {
+        var base = (form.getAttribute('action') || window.location.pathname).split('#')[0];
+        var params = new URLSearchParams(new FormData(form)).toString();
+        var url = base + (params ? '?' + params : '');
+
+        setOpacity('0.45');
+
+        void fetch(url)
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+                var doc = new DOMParser().parseFromString(html, 'text/html');
+                SECCIONES.forEach(function (sel) {
+                    var actual = document.querySelector(sel);
+                    var nuevo = doc.querySelector(sel);
+                    if (actual && nuevo) actual.innerHTML = nuevo.innerHTML;
+                });
+                history.replaceState(null, '', url);
+                setOpacity('');
+            })
+            .catch(function () { setOpacity(''); window.location.href = url; });
+    }
+
+    formularios.forEach(function (form) {
+        // form.submit() no dispara el evento submit — hay que sobreescribir el método.
+        form.submit = function () { aplicarFiltro(form); };
+        form.addEventListener('submit', function (e) { e.preventDefault(); aplicarFiltro(form); });
+    });
+})();

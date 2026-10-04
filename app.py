@@ -11,8 +11,10 @@ Ejecución local:
 from flask import Flask, render_template, request
 
 from components.datos import resumen_general
+from components.multivariada import opciones_multivariadas, tablero_multivariado
 from components.temporal import opciones_temporales, tablero_temporal
 from components.poblacional import opciones_poblacionales, tablero_poblacional
+from components.territorial import conocimientos_territoriales, opciones_territoriales, tablero_territorial
 from components.sitio import (
     DATASET,
     DIMENSIONES,
@@ -85,7 +87,17 @@ def poblacional():
 
 @app.route("/dimension/territorial")
 def territorial():
-    return render_dimension("territorial")
+    opciones = opciones_territoriales()
+    anio = request.args.get("anio", type=int, default=opciones["anio_final"])
+    departamento = request.args.get("departamento", "Todos")
+    return render_dimension(
+        "territorial",
+        opciones=opciones,
+        # tablero_territorial corrige año o departamento inválidos y devuelve
+        # la selección final en tablero["seleccion"].
+        tablero=tablero_territorial(anio, departamento),
+        saberes=conocimientos_territoriales(),
+    )
 
 
 @app.route("/dimension/temporal")
@@ -105,7 +117,33 @@ def temporal():
 
 @app.route("/dimension/multivariada")
 def multivariada():
-    return render_dimension("multivariada")
+    opciones = opciones_multivariadas()
+    seleccion = {
+        "departamento": request.args.get("departamento", "Todos"),
+        "nivel": request.args.get("nivel", "total"),
+        "anio_inicio": request.args.get("anio_inicio", str(opciones["anios"][0])),
+        "anio_fin": request.args.get("anio_fin", str(opciones["anios"][-1])),
+    }
+    try:
+        anio_inicio = int(seleccion["anio_inicio"])
+    except ValueError:
+        anio_inicio = opciones["anios"][0]
+    try:
+        anio_fin = int(seleccion["anio_fin"])
+    except ValueError:
+        anio_fin = opciones["anios"][-1]
+    tablero = tablero_multivariado(
+        seleccion["departamento"],
+        seleccion["nivel"],
+        anio_inicio,
+        anio_fin,
+    )
+    return render_dimension(
+        "multivariada",
+        opciones=opciones,
+        seleccion=tablero["seleccion"],
+        tablero=tablero,
+    )
 
 
 @app.errorhandler(404)

@@ -185,6 +185,7 @@ La aplicación está lista para desplegarse en [Render](https://render.com/) (Pa
 ├── components/               # lógica reutilizable del backend
 │   ├── datos.py               # carga y limpieza del CSV
 │   ├── temporal.py            # datos y gráficas (matplotlib) de la dimensión temporal
+│   ├── multivariada.py         # cruces, indicadores y gráficas de la dimensión multivariada
 │   └── sitio.py                # metadatos de dimensiones e integrantes
 ├── data/                      # dataset CSV (MEN/SNIES)
 ├── docs/                      # evidencias e insumos para el informe técnico
@@ -211,7 +212,8 @@ La aplicación está lista para desplegarse en [Render](https://render.com/) (Pa
 - [x] Aplicación Flask base + componentes listos
 - [x] Scripts de despliegue local (`setup.bat` / `setup.sh`)
 - [x] Dimensión temporal desarrollada (Integrante 3)
-- [ ] Dimensiones poblacional, territorial y multivariada desarrolladas
+- [ ] Dimensiones poblacional y territorial desarrolladas
+- [x] Dimensión relacional y multivariada desarrollada (Integrante 4)
 - [ ] Aplicación publicada en Render
 - [ ] Informe técnico en PDF
 

@@ -1,0 +1,30 @@
+RESUMEN TERRITORIAL 2021
+========================================
+
+Participación del departamento líder: 34,0 % (Bogotá D.C.: 833.565 matriculados)
+Peso de los 10 municipios principales: 68,4 % (Entre 360 municipios con matrícula)
+Municipios con matrícula: 360 (Mediana: 114 matriculados por municipio)
+
+Lectura:
+En 2021, Bogotá D.C. concentra el 34,0 % de la matrícula del país y los cinco primeros departamentos suman 64,4 %. Solo 18 de los 360 municipios con matrícula reúnen el 80 %, y 232 tienen menos de 500 matriculados.
+
+Territorios con menos matrícula:
+Los cinco departamentos con menos matrícula (Vaupés, Guainía, Vichada, Amazonas y San Andrés y Providencia) suman 3.920 matriculados, solo el 0,16 % del país; Vaupés es el último con 212. Entre los municipios, 177 de 360 tienen menos de 100 matriculados y 21 registran apenas 1.
+
+Conocimientos evidentes:
+1. Bogotá D.C. reúne el 34,0 % de la matrícula, los cinco primeros departamentos el 64,4 % y solo 18 municipios llegan al 80 %.
+2. 232 de 360 municipios (64 %) tienen menos de 500 matriculados, la mediana es de 114 y 21 registran apenas 1.
+3. Santander tiene 13,6 % de posgrado y Tolima solo 2,1 % (país: 7,7 %); Cundinamarca tiene 32,1 % en tecnológica frente a 25,2 % del país.
+
+Decisión:
+Como la matrícula está tan concentrada, el Ministerio y las instituciones podrían priorizar un estudio para ampliar la oferta (extensión o virtual) en los departamentos con menos matrícula, cruzándolo antes con su población.
+Bogotá D.C. concentra 34,0 % de la matrícula, mientras Vaupés (212), Guainía (691), Vichada (745), Amazonas (760) y San Andrés y Providencia (1.512) apenas suman 3.920 matriculados en 2021 (gráfica 4).
+
+Cómo se calculó:
+- Se tomó el año 2021: 360 registros.
+- En cada registro se sumaron los seis niveles de formación y así se obtuvo la matrícula total.
+- Se agrupó por departamento y por código de municipio, sumando las filas del mismo municipio. La matrícula del país es 2.448.271.
+- Se calculó el porcentaje de cada territorio sobre el total del país y se ordenó de mayor a menor.
+- Se acumularon los porcentajes de los municipios para ver cuántos reúnen el 80 % (18 en el país) y se contaron los de menos de 500 matriculados (232).
+- Para ver los territorios más pequeños se ordenaron los departamentos de menor a mayor (los 5 últimos) y los municipios se clasificaron por rangos de matrícula, porque muchos empatan con 1 matriculado y un «top» de municipios sería arbitrario.
+- Para el perfil se calculó el porcentaje de cada nivel y se sumaron especialización, maestría y doctorado como «posgrado».

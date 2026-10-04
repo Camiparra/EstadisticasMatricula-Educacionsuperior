@@ -1,17 +1,234 @@
 {# Tablero de la dimensión territorial — Integrante 2 (Jonathan).
-
-   Esta página hereda la estructura común de dimensiones/_plantilla.html.
-   Para completar el tablero, reemplazar aquí los bloques de cada sección:
-       contexto, variables, filtros, indicadores, visualizaciones,
-       conocimientos, limitacion, decision
-
-   Ejemplo:
-       {% block indicadores %}
-       <div class="row g-3">
-           <div class="col-md-4">{{ indicador("2.448.271", "Matrícula 2021", icono="bi-people") }}</div>
-       </div>
-       {% endblock %}
-
-   Los datos se envían desde la función territorial() de app.py. #}
+   Los indicadores, las cuatro gráficas (matplotlib -> PNG en base64), la tabla,
+   la lectura de cada selección y el "cómo se calculó" se generan en
+   components/territorial.py a partir del CSV limpio, y cambian con los filtros
+   de la URL (?anio=...&departamento=...). Los tres conocimientos evidentes, la
+   decisión y la cobertura (saberes) salen del mismo módulo, así que ninguna cifra
+   está escrita a mano. El detalle del análisis está en docs/territorial/. #}
 {% extends "dimensiones/_plantilla.html" %}
 {% from "partials/macros.html" import indicador, tarjeta_grafica, conocimiento %}
+
+{% block estilos %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/territorial.css') }}">
+{% endblock %}
+
+{% set sel = tablero.seleccion %}
+{% set en_pais = sel.departamento == "Todos" %}
+
+{% block contexto %}
+<p class="mt-3 mb-0">
+    Esta dimensión mira <strong>dónde</strong> está la matrícula de educación superior: qué
+    departamentos y municipios concentran más estudiantes, cuáles casi no aparecen y en qué se
+    diferencian. Cada gráfica trabaja con <strong>un solo año</strong> (por defecto {{ opciones.anio_final }})
+    para no repetir estudiantes; con los filtros puedes cambiar de año o acercarte a un departamento.
+</p>
+{% endblock %}
+
+{% block variables %}
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead><tr><th>Variable</th><th>Tipo</th><th>Uso en esta dimensión</th></tr></thead>
+        <tbody>
+            {% for v in tablero.traza.variables %}
+            <tr><td>{{ v.nombre }}</td><td>{{ v.tipo }}</td><td>{{ v.uso }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<p class="mb-0 text-body-secondary">
+    Los datos se leen con <code>components/datos.py</code>, que ya quita las filas repetidas del CSV
+    original y arregla los códigos de departamento y municipio.
+</p>
+{% endblock %}
+
+{% block filtros %}
+<form method="get" action="{{ url_for('territorial') }}#filtros" id="filtros-territorial" class="row g-3 filtros-territorial">
+    <div class="col-md-4">
+        <label class="form-label" for="filtro-anio"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>Año</label>
+        <select id="filtro-anio" name="anio" class="form-select" onchange="this.form.submit()">
+            {% for a in opciones.anios | reverse %}
+            <option value="{{ a }}" {{ "selected" if a == sel.anio }}>{{ a }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-8">
+        <label class="form-label" for="filtro-departamento"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>Departamento</label>
+        <select id="filtro-departamento" name="departamento" class="form-select" onchange="this.form.submit()">
+            {% for d in opciones.departamentos %}
+            <option value="{{ d }}" {{ "selected" if d == sel.departamento }}>{{ "Todos (todo el país)" if d == "Todos" else d }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <noscript><div class="col-12"><button type="submit" class="btn btn-sm btn-outline-secondary">Aplicar filtros</button></div></noscript>
+</form>
+<div class="pie-filtros">
+    <span>Mostrando: <strong>{{ sel.anio }}</strong> · <strong>{{ "todo el país" if en_pais else sel.departamento }}</strong>.</span>
+    {% if sel.anio != opciones.anio_final or not en_pais %}
+    <a href="{{ url_for('territorial') }}#filtros"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Volver al país en {{ opciones.anio_final }}</a>
+    {% else %}
+    <span>Tip: elige un departamento para ver sus municipios y su perfil.</span>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block indicadores %}
+{% set k = tablero.indicadores %}
+<div class="row g-3">
+    <div class="col-md-4">{{ indicador(k.k1.valor, k.k1.etiqueta, icono="bi-trophy", detalle=k.k1.detalle) }}</div>
+    <div class="col-md-4">{{ indicador(k.k2.valor, k.k2.etiqueta, icono="bi-buildings", detalle=k.k2.detalle) }}</div>
+    <div class="col-md-4">{{ indicador(k.k3.valor, k.k3.etiqueta, icono="bi-pin-map", detalle=k.k3.detalle) }}</div>
+</div>
+
+{% if tablero.reparto %}
+<div class="reparto">
+    <h3 class="reparto-titulo">Cómo se reparte la matrícula del país en {{ sel.anio }}</h3>
+    <div class="reparto-barra" aria-hidden="true">
+        {% for t in tablero.reparto %}
+        <div class="reparto-tramo {{ 'tono-resto' if t.resto else 'tono-' ~ loop.index }}"
+             style="flex: {{ '%.2f' | format(t.pct) }} 1 0%"
+             title="{{ t.nombre }}: {{ t.pct | miles(1) }} %">{% if t.pct >= 7 %}{{ t.pct | miles(0) }} %{% endif %}</div>
+        {% endfor %}
+    </div>
+    <ul class="reparto-leyenda">
+        {% for t in tablero.reparto %}
+        <li>
+            <span class="reparto-muestra {{ 'tono-resto' if t.resto else 'tono-' ~ loop.index }}" aria-hidden="true"></span>
+            {{ t.nombre }} <b>{{ t.pct | miles(1) }} %</b>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="lectura-seleccion" role="note">
+    <i class="bi bi-chat-square-text" aria-hidden="true"></i>
+    <div>
+        <p class="lectura-etiqueta">Lo que dicen los datos con esta selección</p>
+        <p class="mb-0">{{ tablero.lectura }}</p>
+    </div>
+</div>
+
+<details class="detalle-calculo">
+    <summary>Qué usamos y cómo llegamos a estas cifras</summary>
+    <div class="detalle-cuerpo">
+        <ol class="pasos-calculo">
+            {% for paso in tablero.traza.pasos %}
+            <li>{{ paso }}</li>
+            {% endfor %}
+        </ol>
+        <p class="mb-0 text-body-secondary">
+            Estos pasos se recalculan con cada filtro: las cifras de arriba y de las gráficas
+            salen exactamente de ellos.
+        </p>
+    </div>
+</details>
+{% endblock %}
+
+{% block visualizaciones %}
+{% call tarjeta_grafica("Gráfica 1. Participación de los departamentos (% de la matrícula del país)",
+                        tablero.interpretaciones.departamentos) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.departamentos }}"
+         alt="Barras horizontales con el porcentaje de matrícula de los departamentos con más estudiantes en {{ sel.anio }}{{ '' if en_pais else ', con ' ~ sel.departamento ~ ' resaltado' }}.">
+{% endcall %}
+
+{% call tarjeta_grafica("Gráfica 2. " ~ tablero.titulo_municipios, tablero.interpretaciones.municipios) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.municipios }}"
+         alt="Barras horizontales con la matrícula de los municipios con más estudiantes {{ 'del país' if en_pais else 'en ' ~ sel.departamento }} en {{ sel.anio }}.">
+{% endcall %}
+
+{% call tarjeta_grafica("Gráfica 3. Perfil por nivel de formación (% de la matrícula de cada territorio)",
+                        tablero.interpretaciones.perfil) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.perfil }}"
+         alt="Barras apiladas al 100 % con la mezcla de niveles de formación del país y {{ 'de los cinco departamentos más grandes' if en_pais else 'de ' ~ sel.departamento }} en {{ sel.anio }}.">
+{% endcall %}
+
+{% call tarjeta_grafica("Gráfica 4. Los territorios con menos matrícula", tablero.interpretaciones.menores) %}
+    <img class="grafica-generada" src="data:image/png;base64,{{ tablero.imagenes.menores }}"
+         alt="Dos paneles de barras: los cinco departamentos con menos matrícula del país en {{ sel.anio }} y cuántos municipios {{ 'del país' if en_pais else 'de ' ~ sel.departamento }} hay en cada rango de matrícula.">
+{% endcall %}
+
+{% if tablero.tabla_menores %}
+<details class="datos-seleccion">
+    <summary>Ver los datos de los territorios con menos matrícula</summary>
+    <div class="row g-3 mt-1">
+        <div class="col-lg-7">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <caption class="caption-top">Departamentos con menos matrícula del país</caption>
+                    <thead><tr><th>Puesto</th><th>Departamento</th><th class="text-end">Matrícula</th><th class="text-end">% del país</th></tr></thead>
+                    <tbody>
+                        {% for f in tablero.tabla_menores %}
+                        <tr><td class="text-nowrap">{{ f.puesto }}</td><td>{{ f.departamento }}</td><td class="text-end">{{ f.valor }}</td><td class="text-end">{{ f.pct }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <caption class="caption-top">Municipios {{ 'del país' if en_pais else 'de ' ~ sel.departamento }} por rango</caption>
+                    <thead><tr><th>Matrícula</th><th class="text-end">Municipios</th><th class="text-end">%</th></tr></thead>
+                    <tbody>
+                        {% for f in tablero.tabla_rangos %}
+                        <tr><td>{{ f.rango }}</td><td class="text-end">{{ f.municipios }}</td><td class="text-end">{{ f.pct }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</details>
+{% endif %}
+
+{% if tablero.tabla %}
+<details class="datos-seleccion">
+    <summary>Ver los datos de la selección actual</summary>
+    <div class="table-responsive mt-2">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr><th>#</th><th>Municipio</th><th>Departamento</th><th class="text-end">Matrícula</th><th class="text-end">% del {{ 'país' if en_pais else 'departamento' }}</th><th class="text-end">% acumulado</th></tr>
+            </thead>
+            <tbody>
+                {% for f in tablero.tabla %}
+                <tr><td>{{ f.puesto }}</td><td>{{ f.municipio }}</td><td>{{ f.departamento }}</td><td class="text-end">{{ f.valor }}</td><td class="text-end">{{ f.pct }}</td><td class="text-end">{{ f.acumulado }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</details>
+{% endif %}
+{% endblock %}
+
+{% block conocimientos %}
+<p class="text-body-secondary">
+    Estos tres conocimientos son del año {{ saberes.anio }} a nivel nacional y no cambian con los
+    filtros; sus cifras salen del mismo cálculo de arriba.
+</p>
+{% for c in saberes.lista %}
+{{ conocimiento(loop.index,
+    pregunta=c.pregunta, variables=c.variables, procedimiento=c.procedimiento,
+    evidencia=c.evidencia, hallazgo=c.hallazgo, interpretacion=c.interpretacion,
+    utilidad=c.utilidad, limitacion=c.limitacion) }}
+{% endfor %}
+{% endblock %}
+
+{% block limitacion %}
+<div class="alert alert-warning mb-0" role="note">
+    Los datos dicen cuánta matrícula se registra en cada municipio, pero no dónde vive el estudiante
+    ni cuánta gente vive en cada territorio. Por eso no se puede decir que un lugar esté «desatendido»
+    ni comparar por habitante, solo comparar cantidades. Además, el número de municipios con datos
+    cambia mucho de un año a otro ({{ saberes.cobertura.max }} en {{ saberes.cobertura.max_anio }} y
+    {{ saberes.cobertura.min }} en {{ saberes.cobertura.min_anio }}), por eso conviene comparar
+    territorios dentro de un mismo año y no sumar el periodo completo. Tampoco hay zona urbana o rural,
+    y Bogotá D.C. es a la vez municipio y departamento.
+</div>
+{% endblock %}
+
+{% block decision %}
+<div class="card border-0 bg-transparent"><div class="card-body p-0">
+    <p class="mb-2"><strong>Posible decisión:</strong> {{ saberes.decision.texto }}</p>
+    <p class="mb-0 text-body-secondary">Sustento: {{ saberes.decision.sustento }}</p>
+</div></div>
+{% endblock %}
