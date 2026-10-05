@@ -1,0 +1,12 @@
+/* Tablero de la dimensión temporal:*/
+.filtros-temporal .form-label { font-weight: 700; color: var(--color-dimension-texto); }
+.seleccion-actual { font-size: 0.95rem; color: var(--app-texto-suave); }
+
+.grafica-generada {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.serie-tabla-temporal { margin-bottom: 1rem; }
+.serie-tabla-temporal summary { cursor: pointer; font-weight: 700; color: var(--color-dimension-texto); }
